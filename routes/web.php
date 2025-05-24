@@ -1,6 +1,9 @@
 <?php
 
-use App\Http\Controllers\AdminDashboardController;
+
+use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\DoctorManagementController;
+use App\Http\Controllers\Admin\SpecialtyController;
 use App\Http\Controllers\DoctorDashboardController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PatientDashboardController;
@@ -22,7 +25,7 @@ Route::middleware('auth')->group(function () {
         $user = Auth::user();
         switch ($user->role) {
             case 'admin':
-                return redirect()->route('admin.dashboard');
+                return redirect()->route('admin.index');
             case 'doctor':
                 return redirect()->route('doctor.dashboard');
             case 'staff':
@@ -41,8 +44,31 @@ Route::middleware('auth')->group(function () {
     // --- Rute untuk Admin ---
     // Dilindungi oleh 'auth' (karena di dalam group middleware 'auth') DAN 'check.role:admin'
     Route::group(['prefix' => 'admin', 'middleware' => 'check.role:admin'], function () {
-        Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
-        // ... rute admin lainnya
+        Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('admin.index');
+        Route::get('/form', [AdminDashboardController::class, 'form'])->name('admin.form');
+        Route::get('/table', [AdminDashboardController::class, 'table'])->name('admin.table');
+
+        //doctor managment
+      Route::get('/doctors', [DoctorManagementController::class, 'index'])->name('admin.index');
+        Route::get('/doctors/create', [DoctorManagementController::class, 'create'])->name('admin.doctors.create');
+        Route::post('/doctors', [DoctorManagementController::class, 'store'])->name('admin.doctors.store');
+        Route::get('/doctors/read', [DoctorManagementController::class, 'read'])->name('admin.doctors.read'); // Tetap seperti ini
+        Route::get('/doctors/edit/{id}', [DoctorManagementController::class, 'edit'])->name('admin.doctors.edit'); // Perhatikan {id}
+        Route::post('/doctors/update/{id}', [DoctorManagementController::class, 'update'])->name('admin.doctors.update'); // Perhatikan {id}
+        Route::delete('/doctors/delete/{id}', [DoctorManagementController::class, 'destroy'])->name('admin.doctors.destroy'); // Menambahkan rute delete
+         
+        
+        //speciality management
+        Route::get('/specialties', [SpecialtyController::class, 'index'])->name('admin.specialties.index');
+        Route::get('/specialties/create', [SpecialtyController::class, 'create'])->name('admin.specialties.create');
+        Route::post('/specialties', [SpecialtyController::class, 'store'])->name('admin.specialties.store');
+        Route::get('/specialties/edit/{id}', [SpecialtyController::class, 'edit'])->name('admin.specialties.edit');
+        Route::put('/specialties/update/{id}', [SpecialtyController::class, 'update'])->name('admin.specialties.update');
+        Route::delete('/specialties/delete/{id}', [SpecialtyController::class, 'destroy'])->name('admin.specialties.destroy');
+        // Jika Anda ingin metode 'read' terpisah untuk spesialisasi juga:
+        // Route::get('/specialties/read', [SpecialtyController::class, 'read'])->name('admin.specialties.read');
+
+
     });
 
     // --- Rute untuk Dokter ---
