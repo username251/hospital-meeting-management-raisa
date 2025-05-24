@@ -1,8 +1,9 @@
 <?php
 
-
 use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\AppointmentController;
 use App\Http\Controllers\Admin\DoctorManagementController;
+use App\Http\Controllers\Admin\PatientController;
 use App\Http\Controllers\Admin\SpecialtyController;
 use App\Http\Controllers\DoctorDashboardController;
 use App\Http\Controllers\HomeController;
@@ -49,7 +50,6 @@ Route::middleware('auth')->group(function () {
         Route::get('/table', [AdminDashboardController::class, 'table'])->name('admin.table');
 
         //doctor managment
-      Route::get('/doctors', [DoctorManagementController::class, 'index'])->name('admin.index');
         Route::get('/doctors/create', [DoctorManagementController::class, 'create'])->name('admin.doctors.create');
         Route::post('/doctors', [DoctorManagementController::class, 'store'])->name('admin.doctors.store');
         Route::get('/doctors/read', [DoctorManagementController::class, 'read'])->name('admin.doctors.read'); // Tetap seperti ini
@@ -65,9 +65,25 @@ Route::middleware('auth')->group(function () {
         Route::get('/specialties/edit/{id}', [SpecialtyController::class, 'edit'])->name('admin.specialties.edit');
         Route::put('/specialties/update/{id}', [SpecialtyController::class, 'update'])->name('admin.specialties.update');
         Route::delete('/specialties/delete/{id}', [SpecialtyController::class, 'destroy'])->name('admin.specialties.destroy');
-        // Jika Anda ingin metode 'read' terpisah untuk spesialisasi juga:
-        // Route::get('/specialties/read', [SpecialtyController::class, 'read'])->name('admin.specialties.read');
+       
+        
+        //patient management
+        Route::get('/patients', [PatientController::class, 'index'])->name('admin.patients.index');
+        Route::get('/patients/create', [PatientController::class, 'create'])->name('admin.patients.create');
+        Route::post('/patients', [PatientController::class, 'store'])->name('admin.patients.store');
+        Route::get('/patients/edit/{id}', [PatientController::class, 'edit'])->name('admin.patients.edit');
+        Route::post('/patients/update/{id}', [PatientController::class, 'update'])->name('admin.patients.update');
+        Route::post('/patients/delete/{id}', [PatientController::class, 'destroy'])->name('admin.patients.destroy');
 
+
+        //appointment management
+        Route::get('/appointments', [AppointmentController::class, 'index'])->name('admin.appointments.index');
+        Route::get('/appointments/create', [AppointmentController::class, 'create'])->name('admin.appointments.create');
+        Route::post('/appointments', [AppointmentController::class, 'store'])->name('admin.appointments.store');
+        Route::get('/appointments/show/{appointment}', [AppointmentController::class, 'show'])->name('admin.appointments.show'); // Gunakan {appointment} karena kita passing model
+        Route::get('/appointments/edit/{appointment}', [AppointmentController::class, 'edit'])->name('admin.appointments.edit'); // Gunakan {appointment}
+        Route::post('/appointments/update/{appointment}', [AppointmentController::class, 'update'])->name('admin.appointments.update'); // Gunakan {appointment}
+        Route::post('/appointments/delete/{appointment}', [AppointmentController::class, 'destroy'])->name('admin.appointments.destroy'); // Gunakan {appointment}
 
     });
 

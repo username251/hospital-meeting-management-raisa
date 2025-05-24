@@ -124,7 +124,7 @@ class DoctorManagementController extends Controller
 
         // Validasi input
         $request->validate([
-            'name'              => 'required|string|max:255', // UBAH: full_name menjadi name
+            'name'              => 'required|string|max:255',
             'email'             => [
                 'required',
                 'string',
@@ -166,7 +166,7 @@ class DoctorManagementController extends Controller
             'consultation_fee' => $request->consultation_fee ?? 0,
         ]);
 
-        return redirect()->route('admin.doctors.index')->with('success', 'Data dokter berhasil diperbarui!');
+        return redirect()->route('admin.doctors.read')->with('success', 'Data dokter berhasil diperbarui!');
     }
 
     /**
