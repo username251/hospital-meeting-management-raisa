@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AppointmentController;
 use App\Http\Controllers\Admin\DoctorManagementController;
+use App\Http\Controllers\Admin\DoctorScheduleController;
 use App\Http\Controllers\Admin\PatientController;
 use App\Http\Controllers\Admin\SpecialtyController;
 use App\Http\Controllers\DoctorDashboardController;
@@ -84,6 +85,16 @@ Route::middleware('auth')->group(function () {
         Route::get('/appointments/edit/{appointment}', [AppointmentController::class, 'edit'])->name('admin.appointments.edit'); // Gunakan {appointment}
         Route::post('/appointments/update/{appointment}', [AppointmentController::class, 'update'])->name('admin.appointments.update'); // Gunakan {appointment}
         Route::post('/appointments/delete/{appointment}', [AppointmentController::class, 'destroy'])->name('admin.appointments.destroy'); // Gunakan {appointment}
+
+
+        //management doctor schedule
+        Route::get('/doctor-schedules', [DoctorScheduleController::class, 'index'])->name('admin.doctor_schedules.index');
+        Route::get('/doctor-schedules/create', [DoctorScheduleController::class, 'create'])->name('admin.doctor_schedules.create');
+        Route::post('/doctor-schedules', [DoctorScheduleController::class, 'store'])->name('admin.doctor_schedules.store');
+        // Route::get('/doctor-schedules/{doctorSchedule}', [DoctorScheduleController::class, 'show'])->name('admin.doctor_schedules.show'); // Opsional
+        Route::get('/doctor-schedules/{doctorSchedule}/edit', [DoctorScheduleController::class, 'edit'])->name('admin.doctor_schedules.edit');
+        Route::put('/doctor-schedules/{doctorSchedule}', [DoctorScheduleController::class, 'update'])->name('admin.doctor_schedules.update');
+        Route::delete('/doctor-schedules/{doctorSchedule}', [DoctorScheduleController::class, 'destroy'])->name('admin.doctor_schedules.destroy');
 
     });
 

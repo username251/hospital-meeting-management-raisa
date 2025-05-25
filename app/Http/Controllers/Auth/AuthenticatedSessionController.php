@@ -8,6 +8,10 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
+use Illuminate\Validation\ValidationException;
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
+// use App\Providers\RouteServiceProvider; // Baris ini tidak lagi diperlukan jika HOME tidak digunakan
 
 class AuthenticatedSessionController extends Controller
 {
@@ -24,25 +28,22 @@ class AuthenticatedSessionController extends Controller
      */
     public function store(LoginRequest $request): RedirectResponse
     {
-        $request->authenticate(); // Otentikasi user
+        $email = $request->input('email');
+        $password = $request->input('password');
 
-        $request->session()->regenerate(); // Regenerasi session
+        $user = User::where('email', $email)->first();
 
-        $user = Auth::user(); // Ambil user yang baru saja login
+        if ($user && Hash::check($password, $user->password)) {
+            Auth::login($user, $request->boolean('remember'));
+            $request->session()->regenerate();
 
-        switch ($user->role) {
-            case 'admin':
-                return redirect()->intended(route('admin.index', absolute: false)); // Contoh: ke /admin/dashboard
-            case 'doctor':
-                return redirect()->intended(route('doctor.dashboard', absolute: false)); // Contoh: ke /doctor/dashboard
-            case 'staff':
-                return redirect()->intended(route('staff.dashboard', absolute: false)); // Contoh: ke /staff/dashboard
-            case 'patient':
-            default: // Default untuk 'patient' atau role lain yang tidak spesifik
-                return redirect()->intended(route('home.dashboard', absolute: false)); // Contoh: ke /patient/dashboard atau /dashboard
+            // Ubah baris ini:
+            return redirect()->intended(route('dashboard')); // Mengarahkan ke rute bernama 'dashboard'
         }
-        // --- Logika Pengalihan Berdasarkan Role ---
-        // --- Akhir Logika Pengalihan Berdasarkan Role ---
+
+        throw ValidationException::withMessages([
+            'email' => trans('auth.failed'),
+        ]);
     }
 
     /**

@@ -60,7 +60,7 @@ class DoctorManagementController extends Controller
         $user = User::create([
             'name'          => $request->name, // UBAH: full_name menjadi name
             'email'         => $request->email,
-            'password'      => Hash::make($request->password), // UBAH: password_hash menjadi password
+            'password'      => Hash::make($request->password), 
             'phone_number'  => $request->phone_number,
             'role'          => 'doctor',
         ]);

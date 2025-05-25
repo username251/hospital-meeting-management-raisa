@@ -41,13 +41,13 @@ class AppointmentController extends Controller
         $request->validate([
             'patient_id' => 'required|exists:patients,id',
             'doctor_id' => 'required|exists:doctors,id',
-            'specialty_id' => 'nullable|exists:specialties,id', // Perubahan: nullable
-            'appointment_date' => 'required|date',               // Perubahan: kolom baru
-            'start_time' => 'required|date_format:H:i',         // Perubahan: kolom baru
-            'end_time' => 'required|date_format:H:i|after:start_time', // Perubahan: kolom baru
-            'reason' => 'nullable|string|max:1000',              // Perubahan: kolom baru
-            'status' => 'required|in:pending,confirmed,completed,cancelled,rescheduled', // Perubahan: opsi enum
-            'notes' => 'nullable|string|max:1000',               // Perubahan: kolom baru
+            'specialty_id' => 'nullable|exists:specialties,id', 
+            'appointment_date' => 'required|date',              
+            'start_time' => 'required|date_format:H:i',         
+            'end_time' => 'required|date_format:H:i|after:start_time', 
+            'reason' => 'nullable|string|max:1000',             
+            'status' => 'required|in:pending,confirmed,completed,cancelled,rescheduled', 
+            'notes' => 'nullable|string|max:1000',               
         ]);
 
         Appointment::create($request->all());
