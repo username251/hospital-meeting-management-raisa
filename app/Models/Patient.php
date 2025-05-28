@@ -9,13 +9,18 @@ class Patient extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'user_id',
-        'address',
-        'date_of_birth',
-        'gender',
-        'medical_history', // Jika Anda menambahkannya di migration
-    ];
+  // app/Models/Patient.php
+protected $fillable = [
+    'user_id', // Pastikan user_id ada jika Patient belongsTo User
+    'phone',
+    'address',
+    'date_of_birth',
+    'gender',
+    'medical_history', // Pastikan ini ada
+    'allergies',       // Pastikan ini ada
+    'current_medications', // Pastikan ini ada
+    'blood_type',      // Pastikan ini ada
+];
 
     protected $casts = [
         'date_of_birth' => 'date',

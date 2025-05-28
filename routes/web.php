@@ -10,6 +10,7 @@ use App\Http\Controllers\DoctorDashboardController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PatientDashboardController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Staff\QueueController;
 use App\Http\Controllers\Staff\StaffDashboardController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth; // Tambahkan ini
@@ -119,9 +120,26 @@ Route::middleware('auth')->group(function () {
         Route::get('/appointments/{appointment}/edit', [\App\Http\Controllers\Staff\AppointmentController::class, 'edit'])->name('staff.appointments.edit');
         Route::put('/appointments/{appointment}', [\App\Http\Controllers\Staff\AppointmentController::class, 'update'])->name('staff.appointments.update'); // Gunakan PUT untuk update
         Route::delete('/appointments/{appointment}', [\App\Http\Controllers\Staff\AppointmentController::class, 'destroy'])->name('staff.appointments.destroy'); // Gunakan DELETE untuk destroy
-
         // Rute khusus untuk update status janji temu
         Route::patch('/appointments/{appointment}/status', [\App\Http\Controllers\Staff\AppointmentController::class, 'updateStatus'])->name('staff.appointments.updateStatus');
+
+
+        //Route untuk antrean 
+        Route::get('/queue', [QueueController::class, 'index'])->name('staff.queue.index');
+        Route::patch('/queue/{appointment}/status', [QueueController::class, 'updateStatus'])->name('staff.queue.updateStatus');
+        Route::post('/queue/{appointment}/call', [QueueController::class, 'callPatient'])->name('staff.queue.callPatient');
+        Route::get('/queue/search', [QueueController::class, 'search'])->name('staff.queue.search'); // Rute untuk pencarian
+
+        //Route untuk pasien
+        Route::resource('patients', \App\Http\Controllers\Staff\PatientController::class)->names([
+            'index' => 'staff.patients.index',
+            'create' => 'staff.patients.create',
+            'store' => 'staff.patients.store',
+            'show' => 'staff.patients.show',
+            'edit' => 'staff.patients.edit',
+            'update' => 'staff.patients.update',
+            'destroy' => 'staff.patients.destroy',
+        ]);
     });
 
     // --- Rute untuk Pasien ---

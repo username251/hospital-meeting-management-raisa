@@ -148,6 +148,22 @@
                                 <p>Manajemen Janji Temu</p>
                             </a>
                         </li>
+
+                         <!-- Manajemen Antrean -->
+                        <li class="nav-item">
+                            <a href="{{ route('staff.queue.index') }}" class="nav-link {{ request()->routeIs('staff.queue.*') ? 'active' : '' }}">
+                                <i class="nav-icon fas fa-users-line"></i> {{-- Icon antrean/orang --}}
+                                <p>Antrean Pasien</p>
+                            </a>
+                        </li>
+
+                           <li class="nav-item"> {{-- BARU --}}
+                                <a href="{{ route('staff.patients.index') }}" class="nav-link {{ request()->routeIs('staff.patients.*') ? 'active' : '' }}">
+                                    <i class="nav-icon fas fa-hospital-user"></i> {{-- Icon pasien --}}
+                                    <p>Manajemen Pasien</p>
+                                </a>
+                            </li>
+
                     </ul>
                 </nav>
             </div>
