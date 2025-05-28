@@ -10,7 +10,7 @@ use App\Http\Controllers\DoctorDashboardController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PatientDashboardController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\StaffDashboardController;
+use App\Http\Controllers\Staff\StaffDashboardController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth; // Tambahkan ini
 
@@ -31,7 +31,7 @@ Route::middleware('auth')->group(function () {
             case 'doctor':
                 return redirect()->route('doctor.dashboard');
             case 'staff':
-                return redirect()->route('staff.dashboard');
+                return redirect()->route('staff.index');
             case 'patient':
             default: // Jika ada role lain atau sebagai fallback
                 return redirect()->route('patient.dashboard');
@@ -47,7 +47,7 @@ Route::middleware('auth')->group(function () {
     // Dilindungi oleh 'auth' (karena di dalam group middleware 'auth') DAN 'check.role:admin'
     Route::group(['prefix' => 'admin', 'middleware' => 'check.role:admin'], function () {
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('admin.index');
-        Route::get('/form', [AdminDashboardController::class, 'form'])->name('admin.form');
+        Route::get('/form', [AdminDashboardController::class, 'form'])->name( 'admin.form');
         Route::get('/table', [AdminDashboardController::class, 'table'])->name('admin.table');
 
         //doctor managment
@@ -108,8 +108,20 @@ Route::middleware('auth')->group(function () {
     // --- Rute untuk Staf ---
     // Prefix 'staff' + path '/dashboard' -> URL: /staff/dashboard
     Route::group(['prefix' => 'staff', 'middleware' => 'check.role:staff'], function () {
-        Route::get('/dashboard', [StaffDashboardController::class, 'index'])->name('staff.dashboard');
-        // ... rute staf lainnya
+        Route::get('/dashboard', [StaffDashboardController::class, 'index'])->name('staff.index');
+            
+
+        //Appointment Summary Route
+        Route::get('/appointments', [\App\Http\Controllers\Staff\AppointmentController::class, 'index'])->name('staff.appointments.index');
+        Route::get('/appointments/create', [\App\Http\Controllers\Staff\AppointmentController::class, 'create'])->name('staff.appointments.create');
+        Route::post('/appointments', [\App\Http\Controllers\Staff\AppointmentController::class, 'store'])->name('staff.appointments.store');
+        Route::get('/appointments/{appointment}', [\App\Http\Controllers\Staff\AppointmentController::class, 'show'])->name('staff.appointments.show'); // Opsional: untuk detail
+        Route::get('/appointments/{appointment}/edit', [\App\Http\Controllers\Staff\AppointmentController::class, 'edit'])->name('staff.appointments.edit');
+        Route::put('/appointments/{appointment}', [\App\Http\Controllers\Staff\AppointmentController::class, 'update'])->name('staff.appointments.update'); // Gunakan PUT untuk update
+        Route::delete('/appointments/{appointment}', [\App\Http\Controllers\Staff\AppointmentController::class, 'destroy'])->name('staff.appointments.destroy'); // Gunakan DELETE untuk destroy
+
+        // Rute khusus untuk update status janji temu
+        Route::patch('/appointments/{appointment}/status', [\App\Http\Controllers\Staff\AppointmentController::class, 'updateStatus'])->name('staff.appointments.updateStatus');
     });
 
     // --- Rute untuk Pasien ---

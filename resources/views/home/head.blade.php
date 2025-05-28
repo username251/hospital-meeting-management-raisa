@@ -63,9 +63,13 @@
                 <a href="{{ route('dashboard') }}" class="btn btn-primary rounded-0 py-4 px-lg-5 d-none d-lg-block">Dashboard<i class="fa fa-arrow-right ms-3"></i></a>
             @elseif(auth()->user()->role === 'patient')
                 <a href="{{ route('appointment') }}" class="btn btn-primary rounded-0 py-4 px-lg-5 d-none d-lg-block">Appointment<i class="fa fa-arrow-right ms-3"></i></a>
+             @elseif(auth()->user()->role === 'staff')
+                <a href="{{ route('staff.index') }}" class="btn btn-primary rounded-0 py-4 px-lg-5 d-none d-lg-block">Dashboard<i class="fa fa-arrow-right ms-3"></i></a>
+             @elseif(auth()->user()->role === 'Doctor')
+                <a href="{{ route('appointment') }}" class="btn btn-primary rounded-0 py-4 px-lg-5 d-none d-lg-block">Dashboard<i class="fa fa-arrow-right ms-3"></i></a>
             @else
                 {{-- Opsional: Tautan default jika peran tidak admin atau patient --}}
-                <a href="{{ route('home') }}" class="btn btn-primary rounded-0 py-4 px-lg-5 d-none d-lg-block">Home<i class="fa fa-arrow-right ms-3"></i></a>
+                <a href="{{ route('home.dashboard') }}" class="btn btn-primary rounded-0 py-4 px-lg-5 d-none d-lg-block">Home<i class="fa fa-arrow-right ms-3"></i></a>
             @endif
         @endauth
         </div>

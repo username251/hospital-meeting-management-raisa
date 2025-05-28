@@ -123,9 +123,9 @@ class DoctorManagementController extends Controller
         $user = $doctor->user; // Dapatkan objek User yang terkait
 
         // Validasi input
-        $request->validate([
+        $request->validate(rules: [
             'name'              => 'required|string|max:255',
-            'email'             => [
+            'email'            => [
                 'required',
                 'string',
                 'email',

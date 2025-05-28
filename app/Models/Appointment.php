@@ -12,37 +12,30 @@ class Appointment extends Model
     protected $fillable = [
         'patient_id',
         'doctor_id',
-        'specialty_id',
-        'appointment_date', // Perubahan: dari appointment_time
-        'start_time',       // Perubahan: kolom baru
-        'end_time',         // Perubahan: kolom baru
-        'reason',           // Perubahan: kolom baru
-        'status',
-        'notes',            // Perubahan: kolom baru
+        'specialty_id', // Pastikan ini ada jika Anda menggunakannya
+        'appointment_date',
+        'start_time',   // <-- TAMBAHKAN ATAU PASTIKAN INI ADA
+        'end_time',     // <-- TAMBAHKAN ATAU PASTIKAN INI ADA
+        'reason',       // Pastikan ini ada
+        'status',       // Pastikan ini ada
+        'notes',        // Pastikan ini ada
     ];
 
-    // Relasi dengan model Patient
+    // Relasi ke model Patient
     public function patient()
     {
         return $this->belongsTo(Patient::class);
     }
 
-    // Relasi dengan model Doctor
+    // Relasi ke model Doctor
     public function doctor()
     {
         return $this->belongsTo(Doctor::class);
     }
 
-    // Relasi dengan model Specialty
+    // Relasi ke model Specialty (jika ada dan ingin ditampilkan)
     public function specialty()
     {
         return $this->belongsTo(Specialty::class);
     }
-
-    // Jika Anda ingin mengelola casting tipe data secara otomatis
-    protected $casts = [
-        'appointment_date' => 'date',
-        'start_time' => 'datetime', // Akan di-cast menjadi objek Carbon
-        'end_time' => 'datetime',   // Akan di-cast menjadi objek Carbon
-    ];
 }
