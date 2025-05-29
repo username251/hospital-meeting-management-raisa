@@ -152,17 +152,34 @@
                          <!-- Manajemen Antrean -->
                         <li class="nav-item">
                             <a href="{{ route('staff.queue.index') }}" class="nav-link {{ request()->routeIs('staff.queue.*') ? 'active' : '' }}">
-                                <i class="nav-icon fas fa-users-line"></i> {{-- Icon antrean/orang --}}
+                                <i class="nav-icon fas fa-hospital-user"></i> {{-- Icon antrean/orang --}}
                                 <p>Antrean Pasien</p>
                             </a>
                         </li>
 
-                           <li class="nav-item"> {{-- BARU --}}
+                        {{-- Manajemen Pasien --}}
+                           <li class="nav-item"> 
                                 <a href="{{ route('staff.patients.index') }}" class="nav-link {{ request()->routeIs('staff.patients.*') ? 'active' : '' }}">
                                     <i class="nav-icon fas fa-hospital-user"></i> {{-- Icon pasien --}}
                                     <p>Manajemen Pasien</p>
                                 </a>
                             </li>
+
+                            {{-- Ketersediaan Dokter --}}
+                            <li class="nav-item">
+                                <a href="{{ route('staff.doctor_availabilities.index') }}" class="nav-link {{ request()->routeIs('staff.doctor_availabilities.*') ? 'active' : '' }}">
+                                    <i class="nav-icon fas fa-clock"></i> {{-- Icon jam/ketersediaan --}}
+                                    <p>Ketersediaan Dokter</p>
+                                </a>
+                            </li>
+
+                            {{-- Manajemen Dokter --}}
+                            <li class="nav-item">
+                            <a href="{{ route('doctors.index') }}" class="nav-link {{ request()->routeIs('staff.doctors.*') ? 'active' : '' }}">
+                                <i class="nav-icon fas fa-user-md"></i> {{-- Icon dokter --}}
+                                <p>Manajemen Dokter</p>
+                            </a>
+                        </li>
 
                     </ul>
                 </nav>
@@ -207,5 +224,8 @@
     
     <!-- Custom JavaScript -->
     @yield('customJs')
+    <script src="{{ asset('dist/js/adminlte.min.js') }}"></script>
+{{-- Stack for page-specific scripts --}}
+@stack('scripts')
 </body>
 </html>

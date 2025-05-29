@@ -10,6 +10,8 @@ use App\Http\Controllers\DoctorDashboardController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PatientDashboardController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Staff\DoctorAvailabilityController;
+use App\Http\Controllers\Staff\DoctorController;
 use App\Http\Controllers\Staff\QueueController;
 use App\Http\Controllers\Staff\StaffDashboardController;
 use Illuminate\Support\Facades\Route;
@@ -111,6 +113,7 @@ Route::middleware('auth')->group(function () {
     Route::group(['prefix' => 'staff', 'middleware' => 'check.role:staff'], function () {
         Route::get('/dashboard', [StaffDashboardController::class, 'index'])->name('staff.index');
             
+        Route::get('/appointments/get-available-slots', [\App\Http\Controllers\Staff\AppointmentController::class, 'getAvailableSlots'])->name('staff.appointments.getAvailableSlots');
 
         //Appointment Summary Route
         Route::get('/appointments', [\App\Http\Controllers\Staff\AppointmentController::class, 'index'])->name('staff.appointments.index');
@@ -130,6 +133,27 @@ Route::middleware('auth')->group(function () {
         Route::post('/queue/{appointment}/call', [QueueController::class, 'callPatient'])->name('staff.queue.callPatient');
         Route::get('/queue/search', [QueueController::class, 'search'])->name('staff.queue.search'); // Rute untuk pencarian
 
+          // Rute untuk Pengelolaan Ketersediaan Dokter (Mengikuti pattern appointments)
+        Route::get('/doctor-availabilities', [DoctorAvailabilityController::class, 'index'])->name('staff.doctor_availabilities.index');
+        Route::get('/doctor-availabilities/create', [DoctorAvailabilityController::class, 'create'])->name('staff.doctor_availabilities.create');
+        Route::post('/doctor-availabilities', [DoctorAvailabilityController::class, 'store'])->name('staff.doctor_availabilities.store');
+        // Jika Anda butuh halaman detail tunggal (show), tambahkan ini:
+        // Route::get('/doctor-availabilities/{doctorAvailability}', [DoctorAvailabilityController::class, 'show'])->name('staff.doctor_availabilities.show');
+        Route::get('/doctor-availabilities/{doctorAvailability}/edit', [DoctorAvailabilityController::class, 'edit'])->name('staff.doctor_availabilities.edit');
+        Route::put('/doctor-availabilities/{doctorAvailability}', [DoctorAvailabilityController::class, 'update'])->name('staff.doctor_availabilities.update');
+        Route::delete('/doctor-availabilities/{doctorAvailability}', [DoctorAvailabilityController::class, 'destroy'])->name('staff.doctor_availabilities.destroy');
+
+
+        //Route Untuk Manajemen Dokter
+        Route::get('/doctors', [DoctorController::class, 'index'])->name('doctors.index');
+        Route::get('/doctors/create', [DoctorController::class, 'create'])->name('doctors.create');
+        Route::post('/doctors', [DoctorController::class, 'store'])->name('doctors.store');
+        Route::get('/doctors/{doctor}/show', [DoctorController::class, 'show'])->name('doctors.show'); // Tambahkan show jika diperlukan
+        Route::get('/doctors/{doctor}/edit', [DoctorController::class, 'edit'])->name('doctors.edit');
+        Route::put('/doctors/{doctor}', [DoctorController::class, 'update'])->name('doctors.update');
+        Route::delete('/doctors/{doctor}', [DoctorController::class, 'destroy'])->name('doctors.destroy');
+
+
         //Route untuk pasien
         Route::resource('patients', \App\Http\Controllers\Staff\PatientController::class)->names([
             'index' => 'staff.patients.index',
@@ -140,6 +164,7 @@ Route::middleware('auth')->group(function () {
             'update' => 'staff.patients.update',
             'destroy' => 'staff.patients.destroy',
         ]);
+        
     });
 
     // --- Rute untuk Pasien ---
@@ -150,5 +175,4 @@ Route::middleware('auth')->group(function () {
         
     });
 });
-
 require __DIR__.'/auth.php'; // Rute otentikasi Breeze

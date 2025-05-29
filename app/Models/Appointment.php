@@ -12,13 +12,13 @@ class Appointment extends Model
     protected $fillable = [
         'patient_id',
         'doctor_id',
-        'specialty_id', // Pastikan ini ada jika Anda menggunakannya
+        'specialty_id', // Pastikan ini juga ada jika Anda menyimpannya
         'appointment_date',
-        'start_time',   // <-- TAMBAHKAN ATAU PASTIKAN INI ADA
-        'end_time',     // <-- TAMBAHKAN ATAU PASTIKAN INI ADA
-        'reason',       // Pastikan ini ada
-        'status',       // Pastikan ini ada
-        'notes',        // Pastikan ini ada
+        'start_time', // <-- Pastikan ini ada
+        'end_time',   // <-- Pastikan ini ada
+        'reason',
+        'status',
+        'notes',      // <-- Pastikan ini ada jika Anda menggunakannya
     ];
 
     // Relasi ke model Patient

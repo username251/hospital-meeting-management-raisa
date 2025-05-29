@@ -16,12 +16,13 @@ class Doctor extends Model
      *
      * @var array<int, string>
      */
-    protected $fillable = [
+     protected $fillable = [
         'user_id',
         'specialty_id',
-        'license_number',
-        'bio',
-        'consultation_fee',
+        'phone_number',     // Tambahkan ini
+        'license_number',   // Tambahkan ini
+        'bio',              // Tambahkan ini
+        'consultation_fee', // Tambahkan ini
     ];
 
     /**
@@ -81,5 +82,9 @@ class Doctor extends Model
     public function blockedSlots(): HasMany
     {
         return $this->hasMany(BlockedSlot::class); // Asumsikan kamu membuat model BlockedSlot
+    }
+    public function availabilities()
+    {
+        return $this->hasMany(DoctorAvailability::class);
     }
 }
