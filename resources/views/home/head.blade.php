@@ -49,7 +49,12 @@
                         <a href="appointment.html" class="dropdown-item">Appointment</a>
                         <a href="testimonial.html" class="dropdown-item">Testimonial</a>
                         <a href="404.html" class="dropdown-item">404 Page</a>
-                         <a href="{{ route('logout') }}" class="nav-item nav-link">Logout</a>
+                         <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit" class="btn btn-link nav-link" style="border: none; padding: 0; color: inherit;">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </button>
+                    </form>
                     </div>
                 </div>
                 <a href="contact.html" class="nav-item nav-link">Contact</a>
@@ -62,11 +67,11 @@
             @if(auth()->user()->role === 'admin')
                 <a href="{{ route('dashboard') }}" class="btn btn-primary rounded-0 py-4 px-lg-5 d-none d-lg-block">Dashboard<i class="fa fa-arrow-right ms-3"></i></a>
             @elseif(auth()->user()->role === 'patient')
-                <a href="{{ route('appointment') }}" class="btn btn-primary rounded-0 py-4 px-lg-5 d-none d-lg-block">Appointment<i class="fa fa-arrow-right ms-3"></i></a>
+                <a href="{{ route('patient.index') }}" class="btn btn-primary rounded-0 py-4 px-lg-5 d-none d-lg-block">Dashboard<i class="fa fa-arrow-right ms-3"></i></a>
              @elseif(auth()->user()->role === 'staff')
                 <a href="{{ route('staff.index') }}" class="btn btn-primary rounded-0 py-4 px-lg-5 d-none d-lg-block">Dashboard<i class="fa fa-arrow-right ms-3"></i></a>
-             @elseif(auth()->user()->role === 'Doctor')
-                <a href="{{ route('appointment') }}" class="btn btn-primary rounded-0 py-4 px-lg-5 d-none d-lg-block">Dashboard<i class="fa fa-arrow-right ms-3"></i></a>
+             @elseif(auth()->user()->role === 'doctor')
+                <a href="{{ route('doctor.dashboard') }}" class="btn btn-primary rounded-0 py-4 px-lg-5 d-none d-lg-block">Dashboard<i class="fa fa-arrow-right ms-3"></i></a>
             @else
                 {{-- Opsional: Tautan default jika peran tidak admin atau patient --}}
                 <a href="{{ route('home.dashboard') }}" class="btn btn-primary rounded-0 py-4 px-lg-5 d-none d-lg-block">Home<i class="fa fa-arrow-right ms-3"></i></a>

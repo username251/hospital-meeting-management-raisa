@@ -12,28 +12,36 @@ class Appointment extends Model
     protected $fillable = [
         'patient_id',
         'doctor_id',
-        'specialty_id', // Pastikan ini juga ada jika Anda menyimpannya
+        'specialty_id',
         'appointment_date',
-        'start_time', // <-- Pastikan ini ada
-        'end_time',   // <-- Pastikan ini ada
+        'start_time',
+        'end_time',
         'reason',
         'status',
-        'notes',      // <-- Pastikan ini ada jika Anda menggunakannya
+        'notes',
     ];
 
-    // Relasi ke model Patient
+    // INI BAGIAN PALING PENTING UNTUK MENGATASI ERROR 'format() on string'
+    protected $casts = [
+        'appointment_date' => 'date',   // Mengonversi ke objek Carbon Date
+        'start_time' => 'datetime',     // Mengonversi ke objek Carbon DateTime
+        'end_time' => 'datetime',       // Mengonversi ke objek Carbon DateTime
+    ];
+
+    // Definisi relasi
     public function patient()
     {
         return $this->belongsTo(Patient::class);
     }
 
-    // Relasi ke model Doctor
-    public function doctor()
-    {
-        return $this->belongsTo(Doctor::class);
-    }
+   public function doctor()
+{
+    return $this->belongsTo(Doctor::class)->withDefault([
+        'user' => (object)['name' => 'Dokter Tidak Ditemukan'],
+        'specialty' => (object)['name' => 'Spesialisasi Tidak Ditemukan']
+    ]);
+}
 
-    // Relasi ke model Specialty (jika ada dan ingin ditampilkan)
     public function specialty()
     {
         return $this->belongsTo(Specialty::class);

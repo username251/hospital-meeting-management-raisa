@@ -1,4 +1,4 @@
-@extends('staff.layout') {{-- Menggunakan layout yang Anda inginkan --}}
+@extends('doctor.layout')
 
 @section('content')
     <div class="content-wrapper">
@@ -10,8 +10,8 @@
                     </div>
                     <div class="col-sm-6">
                         <ol class="breadcrumb float-sm-right">
-                            <li class="breadcrumb-item"><a href="{{ route('staff.index') }}">Home</a></li>
-                            <li class="breadcrumb-item"><a href="{{ route('staff.appointments.index') }}">Janji Temu</a></li>
+                            <li class="breadcrumb-item"><a href="{{ route('doctor.appointments.index') }}">Home</a></li>
+                            <li class="breadcrumb-item"><a href="{{ route('doctor.appointments.index') }}">Janji Temu</a></li>
                             <li class="breadcrumb-item active">Buat Baru</li>
                         </ol>
                     </div>
@@ -27,8 +27,7 @@
                             <div class="card-header">
                                 <h3 class="card-title">Form Janji Temu</h3>
                             </div>
-                            {{-- Form utama untuk membuat janji temu --}}
-                            <form action="{{ route('staff.appointments.store') }}" method="POST">
+                            <form action="{{ route('doctor.appointments.store') }}" method="POST">
                                 @csrf
                                 <div class="card-body">
                                     @if ($errors->any())
@@ -45,11 +44,6 @@
                                             {{ session('error') }}
                                         </div>
                                     @endif
-                                    @if (session('success'))
-                                        <div class="alert alert-success">
-                                            {{ session('success') }}
-                                        </div>
-                                    @endif
 
                                     <div class="form-group">
                                         <label for="patient_id">Pasien</label>
@@ -57,7 +51,7 @@
                                             <option value="">-- Pilih Pasien --</option>
                                             @foreach ($patients as $patient)
                                                 <option value="{{ $patient->id }}" {{ old('patient_id') == $patient->id ? 'selected' : '' }}>
-                                                    {{ $patient->user->name ?? 'N/A' }} (MRN: {{ $patient->medical_record_number ?? 'N/A' }})
+                                                    {{ $patient->user->name ?? 'N/A' }} ({{ $patient->medical_record_number ?? 'N/A' }})
                                                 </option>
                                             @endforeach
                                         </select>
@@ -79,19 +73,17 @@
 
                                     <div class="form-group">
                                         <label for="appointment_date">Tanggal Janji Temu</label>
-                                        <input type="date" name="appointment_date" id="appointment_date" class="form-control @error('appointment_date') is-invalid @enderror" value="{{ old('appointment_date', \Carbon\Carbon::now()->format('Y-m-d')) }}" required min="{{ \Carbon\Carbon::now()->format('Y-m-d') }}">
+                                        <input type="date" name="appointment_date" id="appointment_date" class="form-control @error('appointment_date') is-invalid @enderror" value="{{ old('appointment_date') }}" required>
                                         @error('appointment_date') <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span> @enderror
                                     </div>
 
                                     <div class="form-group">
-                                        <label for="start_time_slot">Waktu Janji Temu</label>
-                                        {{-- Nama input disesuaikan dengan Controller: start_time_slot --}}
-                                        <select name="start_time_slot" id="start_time_slot" class="form-control @error('start_time_slot') is-invalid @enderror" required disabled>
+                                        <label for="appointment_time">Waktu Janji Temu (Mulai)</label>
+                                        {{-- Nama input tetap appointment_time sesuai request validation --}}
+                                        <select name="appointment_time" id="appointment_time" class="form-control @error('appointment_time') is-invalid @enderror" required disabled>
                                             <option value="">-- Pilih Dokter dan Tanggal Dulu --</option>
                                         </select>
-                                        {{-- Hidden input untuk end_time_slot --}}
-                                        <input type="hidden" name="end_time_slot" id="hidden_end_time_slot" value="{{ old('end_time_slot') }}">
-                                        @error('start_time_slot') <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span> @enderror
+                                        @error('appointment_time') <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span> @enderror
                                     </div>
 
                                     <div class="form-group">
@@ -105,10 +97,8 @@
                                         <select name="status" id="status" class="form-control @error('status') is-invalid @enderror" required>
                                             <option value="scheduled" {{ old('status') == 'scheduled' ? 'selected' : '' }}>Scheduled</option>
                                             <option value="pending" {{ old('status') == 'pending' ? 'selected' : '' }}>Pending</option>
-                                            <option value="confirmed" {{ old('status') == 'confirmed' ? 'selected' : '' }}>Confirmed</option>
-                                            {{-- Tambahkan status lain jika diperlukan, sesuai enum di database --}}
-                                            {{-- <option value="completed" {{ old('status') == 'completed' ? 'selected' : '' }}>Completed</option> --}}
-                                            {{-- <option value="cancelled" {{ old('status') == 'cancelled' ? 'selected' : '' }}>Cancelled</option> --}}
+                                            <option value="completed" {{ old('status') == 'completed' ? 'selected' : '' }}>Completed</option>
+                                            <option value="cancelled" {{ old('status') == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
                                         </select>
                                         @error('status') <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span> @enderror
                                     </div>
@@ -116,7 +106,7 @@
                                 </div>
                                 <div class="card-footer">
                                     <button type="submit" class="btn btn-primary">Buat Janji Temu</button>
-                                    <a href="{{ route('staff.appointments.index') }}" class="btn btn-secondary">Batal</a>
+                                    <a href="{{ route('doctor.appointments.index') }}" class="btn btn-secondary">Batal</a>
                                 </div>
                             </form>
                         </div>
@@ -133,90 +123,56 @@
             function loadAvailableSlots() {
                 var doctorId = $('#doctor_id').val();
                 var appointmentDate = $('#appointment_date').val();
-                var startTimeSelect = $('#start_time_slot');
-                var hiddenEndTimeInput = $('#hidden_end_time_slot');
+                var appointmentTimeSelect = $('#appointment_time');
 
-                startTimeSelect.html('<option value="">Memuat slot...</option>');
-                startTimeSelect.prop('disabled', true);
-                hiddenEndTimeInput.val(''); // Kosongkan end time saat memuat ulang
+                appointmentTimeSelect.html('<option value="">Memuat slot...</option>');
+                appointmentTimeSelect.prop('disabled', true);
 
                 if (doctorId && appointmentDate) {
                     $.ajax({
-                        url: '{{ route("staff.appointments.getAvailableSlots") }}',
+                        url: '{{ route("doctor.appointments.getAvailableSlots") }}', // Gunakan rute API yang baru
                         method: 'GET',
                         data: {
                             doctor_id: doctorId,
                             date: appointmentDate
                         },
                         success: function(response) {
-                            startTimeSelect.empty();
+                            appointmentTimeSelect.empty();
                             if (response.length > 0) {
-                                startTimeSelect.append($('<option>', {
-                                    value: '',
-                                    text: '-- Pilih Slot Waktu --'
-                                }));
                                 $.each(response, function(index, slot) {
-                                    startTimeSelect.append($('<option>', {
-                                        value: slot.start, // Menggunakan start time sebagai value
-                                        text: slot.display, // Teks yang ditampilkan (ex: 09:00 - 09:30)
-                                        'data-end-time': slot.end // Simpan end time di data attribute
+                                    appointmentTimeSelect.append($('<option>', {
+                                        value: slot.time,
+                                        text: slot.display
                                     }));
                                 });
-                                startTimeSelect.prop('disabled', false);
-
-                                // Atur nilai awal hidden_end_time_slot jika ada old value atau default
-                                if (startTimeSelect.val()) {
-                                    hiddenEndTimeInput.val(startTimeSelect.find('option:selected').data('end-time'));
-                                } else {
-                                    // Jika tidak ada slot yang terpilih secara otomatis, pastikan end time kosong
-                                    hiddenEndTimeInput.val('');
-                                }
+                                appointmentTimeSelect.prop('disabled', false);
                             } else {
-                                startTimeSelect.html('<option value="">Tidak ada slot tersedia untuk tanggal ini</option>');
-                                startTimeSelect.prop('disabled', true);
+                                appointmentTimeSelect.html('<option value="">Tidak ada slot tersedia untuk tanggal ini</option>');
+                                appointmentTimeSelect.prop('disabled', true);
                             }
                         },
                         error: function(xhr, status, error) {
                             console.error("Error loading available slots:", error);
-                            startTimeSelect.html('<option value="">Gagal memuat slot</option>');
-                            startTimeSelect.prop('disabled', true);
-                            hiddenEndTimeInput.val('');
+                            appointmentTimeSelect.html('<option value="">Gagal memuat slot</option>');
+                            appointmentTimeSelect.prop('disabled', true);
                         }
                     });
                 } else {
-                    startTimeSelect.html('<option value="">-- Pilih Dokter dan Tanggal Dulu --</option>');
-                    startTimeSelect.prop('disabled', true);
-                    hiddenEndTimeInput.val('');
+                    appointmentTimeSelect.html('<option value="">-- Pilih Dokter dan Tanggal Dulu --</option>');
                 }
             }
 
             // Panggil saat dokter atau tanggal berubah
             $('#doctor_id, #appointment_date').on('change', loadAvailableSlots);
 
-            // Perbarui hidden_end_time_slot saat slot waktu dipilih
-            $('#start_time_slot').on('change', function() {
-                var selectedOption = $(this).find('option:selected');
-                $('#hidden_end_time_slot').val(selectedOption.data('end-time') || '');
-            });
-
-            // Panggil saat halaman dimuat untuk mengisi jika ada old input
+            // Jika ada old input saat validasi gagal, coba load slot lagi
             @if (old('doctor_id') && old('appointment_date'))
-                // Pastikan dokter dan tanggal sudah diatur dulu
-                $('#doctor_id').val('{{ old('doctor_id') }}');
-                $('#appointment_date').val('{{ old('appointment_date') }}');
                 loadAvailableSlots();
-                // Tunggu sebentar agar slot terisi sebelum mencoba memilih old time
-                setTimeout(function() {
-                    var oldStartTime = '{{ old('start_time_slot') }}';
-                    if (oldStartTime) {
-                        $('#start_time_slot').val(oldStartTime);
-                        // Trigger change untuk memastikan hidden_end_time_slot terisi
-                        $('#start_time_slot').trigger('change');
-                    }
-                }, 500); // Penundaan 500ms, bisa disesuaikan
-            @else
-                // Jika tidak ada old input, panggil loadAvailableSlots untuk mengisi slot berdasarkan tanggal dan dokter default jika ada
-                loadAvailableSlots();
+                // Pilih kembali old time jika ada
+                var oldTime = '{{ old('appointment_time') }}';
+                if (oldTime) {
+                    $('#appointment_time').val(oldTime);
+                }
             @endif
         });
     </script>

@@ -11,13 +11,12 @@ return new class extends Migration
      */
  public function up(): void
 {
-    Schema::table('doctors', function (Blueprint $table) {
+     Schema::table('doctors', function (Blueprint $table) {
+    if (!Schema::hasColumn('doctors', 'phone_number')) {
         $table->string('phone_number')->nullable()->after('specialty_id');
-        // Hapus baris ini jika license_number sudah ada
-        // $table->string('license_number')->unique()->nullable()->after('phone_number');
-        $table->text('bio')->nullable()->after('phone_number'); // Sesuaikan 'after' jika license_number dihapus
-        $table->decimal('consultation_fee', 10, 2)->default(0)->after('bio');
-    });
+    }
+    // ... baris lain ...
+});
 }
 
 public function down(): void

@@ -35,8 +35,8 @@ protected $fillable = [
     }
 
     // Anda bisa menambahkan relasi lain di sini, misal:
-    // public function appointments()
-    // {
-    //     return $this->hasMany(Appointment::class);
-    // }
+    public function appointments()
+    {
+        return $this->hasMany(Appointment::class);
+    }
 }

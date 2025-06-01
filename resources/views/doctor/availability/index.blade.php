@@ -1,4 +1,4 @@
-@extends('staff.layout') {{-- Sesuaikan dengan layout Anda --}}
+@extends('doctor.layout')
 
 @section('content')
 <div class="content-wrapper">
@@ -6,12 +6,12 @@
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-6">
-                    <h1>Jadwal Ketersediaan Dokter</h1>
+                    <h1>Jadwal Ketersediaan Saya</h1>
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="{{ route('staff.index') }}">Dashboard</a></li>
-                        <li class="breadcrumb-item active">Jadwal Dokter</li>
+                        <li class="breadcrumb-item"><a href="{{ route('doctor.dashboard') }}">Dashboard</a></li>
+                        <li class="breadcrumb-item active">Jadwal Saya</li>
                     </ol>
                 </div>
             </div>
@@ -31,7 +31,7 @@
             @if (session('error'))
                 <div class="alert alert-danger alert-dismissible fade show" role="alert">
                     {{ session('error') }}
-                    <button type="button" class="close" data-dismiss="alert" aria-Kabel">
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
@@ -39,41 +39,13 @@
 
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title">Filter Jadwal Dokter</h3>
-                </div>
-                <div class="card-body">
-                    <form action="{{ route('staff.doctor_availabilities.index') }}" method="GET">
-                        <div class="form-group row">
-                            <label for="doctor_id" class="col-sm-2 col-form-label">Pilih Dokter:</label>
-                            <div class="col-sm-6">
-                                <select name="doctor_id" id="doctor_id" class="form-control">
-                                    <option value="">Semua Dokter</option>
-                                    @foreach ($doctors as $doctor)
-                                        <option value="{{ $doctor->id }}" {{ $selectedDoctorId == $doctor->id ? 'selected' : '' }}>
-                                            {{ $doctor->user->name }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="col-sm-4">
-                                <button type="submit" class="btn btn-primary">Filter</button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
-
-            <div class="card mt-3">
-                <div class="card-header">
                     <h3 class="card-title">Tampilan Kalender Jadwal</h3>
                     <div class="card-tools">
-                        <a href="{{ route('staff.doctor_availabilities.create') }}" class="btn btn-primary btn-sm">Tambah Jadwal Baru</a>
+                        <a href="{{ route('doctor.availability.create') }}" class="btn btn-primary btn-sm">Tambah Jadwal Baru</a>
                     </div>
                 </div>
                 <div class="card-body">
-                    @if($availabilities->isEmpty() && $selectedDoctorId)
-                        <div class="alert alert-info text-center">Tidak ada jadwal ketersediaan untuk dokter ini.</div>
-                    @elseif($availabilities->isEmpty() && !$selectedDoctorId)
+                    @if(empty($availabilities))
                         <div class="alert alert-info text-center">Tidak ada jadwal ketersediaan yang ditemukan.</div>
                     @else
                         <div id='calendar'></div>
@@ -81,8 +53,7 @@
                 </div>
             </div>
 
-            <div class="card mt-3">
-                <div class="card-header">
+            <div class="card mt-3"> <div class="card-header">
                     <h3 class="card-title">Daftar Jadwal (Tabel Detail)</h3>
                 </div>
                 <div class="card-body p-0">
@@ -92,10 +63,9 @@
                         <table class="table table-striped projects">
                             <thead>
                                 <tr>
-                                    <th style="width: 15%">Dokter</th>
-                                    <th style="width: 10%">Hari</th>
-                                    <th style="width: 15%">Waktu Mulai</th>
-                                    <th style="width: 15%">Waktu Selesai</th>
+                                    <th style="width: 15%">Hari</th>
+                                    <th style="width: 20%">Waktu Mulai</th>
+                                    <th style="width: 20%">Waktu Selesai</th>
                                     <th style="width: 15%">Durasi Slot (Menit)</th>
                                     <th style="width: 10%">Status</th>
                                     <th style="width: 20%">Aksi</th>
@@ -104,13 +74,12 @@
                             <tbody>
                                 @foreach ($availabilities as $availability)
                                     <tr>
-                                        <td>{{ $availability->doctor->user->name ?? 'N/A' }}</td>
                                         <td>{{ $availability->day_name }}</td>
                                         <td>{{ \Carbon\Carbon::parse($availability->start_time)->format('H:i') }}</td>
                                         <td>{{ \Carbon\Carbon::parse($availability->end_time)->format('H:i') }}</td>
                                         <td>{{ $availability->slot_duration }}</td>
                                         <td>
-                                            <form action="{{ route('staff.doctor_availabilities.toggle', $availability->id) }}" method="POST" style="display: inline-block;">
+                                            <form action="{{ route('doctor.availability.toggle', $availability->id) }}" method="POST" style="display: inline-block;">
                                                 @csrf
                                                 @method('PATCH')
                                                 <button type="submit" class="btn btn-sm {{ $availability->is_available ? 'btn-success' : 'btn-secondary' }}">
@@ -119,10 +88,10 @@
                                             </form>
                                         </td>
                                         <td class="project-actions">
-                                            <a class="btn btn-info btn-sm" href="{{ route('staff.doctor_availabilities.edit', $availability->id) }}">
+                                            <a class="btn btn-info btn-sm" href="{{ route('doctor.availability.edit', $availability->id) }}">
                                                 <i class="fas fa-pencil-alt"></i> Edit
                                             </a>
-                                            <form action="{{ route('staff.doctor_availabilities.destroy', $availability->id) }}" method="POST" style="display: inline-block;">
+                                            <form action="{{ route('doctor.availability.destroy', $availability->id) }}" method="POST" style="display: inline-block;">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Apakah Anda yakin ingin menghapus jadwal ini?');">
@@ -137,57 +106,47 @@
                     @endif
                 </div>
             </div>
-        </div>
-    </section>
-</div>
+        </div></section>
+    </div>
 @endsection
 
 @push('scripts')
-<script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js'></script>
-<script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/locales/id.js'></script> {{-- Untuk bahasa Indonesia --}}
-<link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css' rel='stylesheet' />
-
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         var calendarEl = document.getElementById('calendar');
         var calendar = new FullCalendar.Calendar(calendarEl, {
-            initialView: 'timeGridWeek',
-            locale: 'id',
+            initialView: 'timeGridWeek', // Tampilan awal: mingguan dengan slot waktu
+            locale: 'id', // Menggunakan bahasa Indonesia
             headerToolbar: {
                 left: 'prev,next today',
                 center: 'title',
                 right: 'dayGridMonth,timeGridWeek,timeGridDay'
             },
-            slotMinTime: '06:00:00',
-            slotMaxTime: '22:00:00',
-            height: 'auto',
-            allDaySlot: false,
-            events: @json($events),
-            eventContent: function(arg) {
-                // Tampilkan nama dokter di event title jika ada lebih dari satu dokter
-                let title = arg.event.title;
-                if (@json($selectedDoctorId) === null && arg.event.extendedProps.doctor_name) {
-                    title = arg.event.extendedProps.doctor_name + ' - ' + title;
-                }
-                return { html: '<b>' + title + '</b>' };
-            },
+            slotMinTime: '06:00:00', // Waktu mulai hari di kalender (misal: 6 pagi)
+            slotMaxTime: '22:00:00', // Waktu selesai hari di kalender (misal: 10 malam)
+            height: 'auto', // Tinggi kalender menyesuaikan konten
+            allDaySlot: false, // Sembunyikan baris "All-day"
+            events: @json($events), // Meneruskan data events dari Laravel
             eventClick: function(info) {
+                // Saat event di kalender diklik
                 var event = info.event;
                 var extendedProps = event.extendedProps;
 
+                // Anda bisa menampilkan modal atau redirect ke halaman edit
                 if (extendedProps.edit_url) {
                     if (confirm('Jadwal ini (' + event.title + '). Ingin mengedit jadwal ini?')) {
                         window.location.href = extendedProps.edit_url;
                     }
                 } else {
                     alert('Detail Jadwal:\n' +
-                          'Dokter: ' + extendedProps.doctor_name + '\n' +
                           'Hari: ' + event.start.toLocaleString('id-ID', { weekday: 'long' }) + '\n' +
                           'Waktu: ' + event.start.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' - ' + event.end.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + '\n' +
                           'Durasi Slot: ' + extendedProps.slot_duration + ' menit\n' +
                           'Status: ' + extendedProps.status);
                 }
             },
+            // Tambahkan eventDisplay: 'auto' atau 'block' jika event tidak terlihat dengan baik
+            // eventDisplay: 'block', // Coba ini jika event tidak muncul
         });
         calendar.render();
     });

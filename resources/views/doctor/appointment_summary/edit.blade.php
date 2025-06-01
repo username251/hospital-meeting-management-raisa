@@ -1,4 +1,4 @@
-@extends('staff.layout')
+@extends('doctor.layout')
 
 @section('content')
     <div class="content-wrapper">
@@ -10,8 +10,8 @@
                     </div>
                     <div class="col-sm-6">
                         <ol class="breadcrumb float-sm-right">
-                            <li class="breadcrumb-item"><a href="{{ route('staff.index') }}">Home</a></li>
-                            <li class="breadcrumb-item"><a href="{{ route('staff.appointments.index') }}">Janji Temu</a></li>
+                            <li class="breadcrumb-item"><a href="{{ route('doctor.appointments.index') }}">Home</a></li>
+                            <li class="breadcrumb-item"><a href="{{ route('doctor.appointments.index') }}">Janji Temu</a></li>
                             <li class="breadcrumb-item active">Edit</li>
                         </ol>
                     </div>
@@ -27,7 +27,7 @@
                             <div class="card-header">
                                 <h3 class="card-title">Form Edit Janji Temu</h3>
                             </div>
-                            <form action="{{ route('staff.appointments.update', $appointment->id) }}" method="POST">
+                            <form action="{{ route('doctor.appointments.update', $appointment->id) }}" method="POST">
                                 @csrf
                                 @method('PUT') {{-- Gunakan PUT method untuk update --}}
                                 <div class="card-body">
@@ -135,7 +135,7 @@
                                 </div>
                                 <div class="card-footer"> {{-- Mengikuti gaya card-footer dari create.blade --}}
                                     <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
-                                    <a href="{{ route('staff.appointments.index') }}" class="btn btn-secondary">Batal</a>
+                                    <a href="{{ route('doctor.appointments.index') }}" class="btn btn-secondary">Batal</a>
                                 </div>
                             </form>
                         </div>
@@ -160,7 +160,7 @@
 
                 if (doctorId && appointmentDate) {
                     $.ajax({
-                        url: '{{ route("staff.appointments.getAvailableSlots") }}',
+                        url: '{{ route("doctor.appointments.getAvailableSlots") }}',
                         method: 'GET',
                         data: {
                             doctor_id: doctorId,
