@@ -47,9 +47,10 @@
                     @csrf
                     <div class="form-group">
                         <label for="day_of_week">Hari</label>
-                        <select name="day_of_week" id="day_of_week" class="form-control @error('day_of_week') is-invalid @enderror" required>
+                       <select name="day_of_week" id="day_of_week" class="form-control @error('day_of_week') is-invalid @enderror" required>
                             <option value="">Pilih Hari</option>
-                            @foreach($daysOfWeek as $key => $day)
+                            {{-- Gunakan $daysOfWeekForForm sesuai dengan yang dikirim controller --}}
+                            @foreach($daysOfWeekForForm as $key => $day)
                                 <option value="{{ $key }}" {{ old('day_of_week') == $key ? 'selected' : '' }}>{{ $day }}</option>
                             @endforeach
                         </select>

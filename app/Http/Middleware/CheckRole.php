@@ -15,7 +15,7 @@ class CheckRole
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      * @param  string  $role  // Parameter untuk role yang diharapkan
      */
-    public function handle(Request $request, Closure $next, string $role): Response
+    public function handle(Request $request, Closure $next, string $role, ): Response
     {
         if (!Auth::check()) {
             if ($request->expectsJson()) {

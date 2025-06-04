@@ -95,7 +95,7 @@
                         <img src="dist/img/user2-160x160.jpg" class="img-circle elevation-2" alt="User Image">
                     </div>
                     <div class="info">
-                        <a href="#" class="d-block">{{ Auth::user()->name }}</a>
+                        <a href="{{ route('patient.profile.edit') }}" class="d-block">{{ Auth::user()->name }}</a>
                     </div>
                 </div>
 
@@ -121,7 +121,7 @@
 
 
                          <li class="nav-item">
-                            <a href="{{ route('appointments.index') }}" class="nav-link {{ request()->routeIs('staff.appointments.*') ? 'active' : '' }}">
+                            <a href="{{ route('appointments.index') }}" class="nav-link {{ request()->routeIs('patient.appointments.*') ? 'active' : '' }}">
                                 <i class="nav-icon fas fa-calendar-check"></i>
                                 <p>Manajemen Janji Temu</p>
                             </a>

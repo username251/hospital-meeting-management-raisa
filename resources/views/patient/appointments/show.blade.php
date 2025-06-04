@@ -15,8 +15,8 @@
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="{{ route('patient.dashboard') }}">Dashboard</a></li>
-                        <li class="breadcrumb-item"><a href="{{ route('patient.appointments.index') }}">Janji Temu Saya</a></li>
+                        <li class="breadcrumb-item"><a href="{{ route('patient.index') }}">Dashboard</a></li>
+                        <li class="breadcrumb-item"><a href="{{ route('appointments.index') }}">Janji Temu Saya</a></li>
                         <li class="breadcrumb-item active">Detail</li>
                     </ol>
                 </div>

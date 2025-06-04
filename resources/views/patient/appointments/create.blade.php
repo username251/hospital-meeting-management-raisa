@@ -2,7 +2,6 @@
 
 @section('customCss')
     {{-- Jika Anda menggunakan Datepicker/Timepicker atau library CSS lainnya, sertakan di sini --}}
-    {{-- Contoh: Datepicker dari AdminLTE atau bootstrap-datepicker --}}
     <link rel="stylesheet" href="{{ asset('plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css') }}">
 @endsection
 
@@ -18,6 +17,7 @@
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
                         <li class="breadcrumb-item"><a href="{{ route('patient.index') }}">Dashboard</a></li>
+                        {{-- Pastikan nama rute 'appointments.index' benar atau ganti ke 'patient.appointments.index' --}}
                         <li class="breadcrumb-item"><a href="{{ route('appointments.index') }}">Janji Temu Saya</a></li>
                         <li class="breadcrumb-item active">Jadwalkan Baru</li>
                     </ol>
@@ -62,6 +62,7 @@
                 <div class="card-header">
                     <h3 class="card-title">Form Janji Temu</h3>
                 </div>
+                {{-- Pastikan nama rute 'appointments.store' benar atau ganti ke 'patient.appointments.store' --}}
                 <form action="{{ route('appointments.store') }}" method="POST">
                     @csrf
                     <div class="card-body">
@@ -98,11 +99,12 @@
                         </div>
 
                         <div class="form-group">
-                            <label for="appointment_time">Waktu Janji Temu</label>
-                            <select name="appointment_time" id="appointment_time" class="form-control @error('appointment_time') is-invalid @enderror" required disabled>
+                            {{-- UBAH name dan id di sini --}}
+                            <label for="start_time_slot">Waktu Janji Temu</label>
+                            <select name="start_time_slot" id="start_time_slot" class="form-control @error('start_time_slot') is-invalid @enderror" required disabled>
                                 <option value="">-- Pilih Dokter dan Tanggal Dulu --</option>
                             </select>
-                            @error('appointment_time')
+                            @error('start_time_slot')
                                 <span class="invalid-feedback" role="alert">
                                     <strong>{{ $message }}</strong>
                                 </span>
@@ -120,13 +122,12 @@
                             @enderror
                         </div>
 
-                        {{-- Input status default: pasien tidak bisa memilih status --}}
                         <input type="hidden" name="status" value="pending">
-                        {{-- Atau 'scheduled' jika Anda ingin janji temu langsung dijadwalkan, bukan menunggu persetujuan dokter --}}
 
                     </div>
                     <div class="card-footer">
                         <button type="submit" class="btn btn-primary">Jadwalkan Janji Temu</button>
+                        {{-- Pastikan nama rute 'appointments.index' benar atau ganti ke 'patient.appointments.index' --}}
                         <a href="{{ route('appointments.index') }}" class="btn btn-secondary">Batal</a>
                     </div>
                 </form>
@@ -137,14 +138,13 @@
 @endsection
 
 @section('customJs')
-    <script src="plugins/jquery/jquery.min.js"></script>
-    <script src="plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
-    {{-- Pastikan Anda punya AdminLTE JS, atau sesuaikan --}}
-    <script src="dist/js/adminlte.min.js"></script>
-    <script src="dist/js/demo.js"></script>
-    {{-- Jika menggunakan Datepicker/Timepicker lain, sertakan di sini --}}
-    <script src="plugins/moment/moment.min.js"></script>
-    <script src="plugins/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js"></script>
+    {{-- Pastikan path asset ini benar relatif terhadap folder public --}}
+    <script src="{{ asset('plugins/jquery/jquery.min.js') }}"></script>
+    <script src="{{ asset('plugins/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ asset('dist/js/adminlte.min.js') }}"></script>
+    {{-- <script src="{{ asset('dist/js/demo.js') }}"></script> --}} {{-- Demo.js biasanya tidak diperlukan untuk produksi --}}
+    <script src="{{ asset('plugins/moment/moment.min.js') }}"></script>
+    <script src="{{ asset('plugins/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js') }}"></script>
 
     <script>
         $(document).ready(function() {
@@ -164,7 +164,8 @@
             function loadAvailableSlots() {
                 var doctorId = $('#doctor_id').val();
                 var date = $('#appointment_date').val();
-                var timeSelect = $('#appointment_time');
+                // UBAH selector di sini
+                var timeSelect = $('#start_time_slot');
                 var loadingMessage = $('#slot_loading_message');
 
                 timeSelect.empty().append('<option value="">-- Memuat slot... --</option>').prop('disabled', true);
@@ -172,7 +173,7 @@
 
                 if (doctorId && date) {
                     $.ajax({
-                        url: "{{ route('appointments.get-available-slots') }}", // Rute AJAX
+                        url: "{{ route('api.patient.available-slots') }}", // Pastikan nama rute ini benar
                         method: 'GET',
                         data: {
                             doctor_id: doctorId,
@@ -180,11 +181,14 @@
                         },
                         success: function(response) {
                             timeSelect.empty();
-                            if (response.length > 0) {
+                            if (response && Array.isArray(response) && response.length > 0) {
                                 timeSelect.append('<option value="">-- Pilih Waktu --</option>');
                                 $.each(response, function(index, slot) {
-                                    var isSelected = (slot.time == "{{ old('appointment_time') }}");
-                                    timeSelect.append('<option value="' + slot.time + '" ' + (isSelected ? 'selected' : '') + '>' + slot.display + '</option>');
+                                    // Pastikan respons memiliki 'start' dan 'display'
+                                    // 'slot.start' akan menjadi value (H:i:s)
+                                    // 'slot.display' akan menjadi teks yang terlihat (H:i - H:i)
+                                    var isSelected = (slot.start == "{{ old('start_time_slot') }}"); // UBAH old() di sini
+                                    timeSelect.append('<option value="' + slot.start + '" ' + (isSelected ? 'selected' : '') + '>' + slot.display + '</option>');
                                 });
                                 timeSelect.prop('disabled', false);
                                 loadingMessage.text('Slot waktu tersedia.').removeClass('text-danger').addClass('text-success');
@@ -196,8 +200,18 @@
                         },
                         error: function(xhr, status, error) {
                             console.error("Error fetching available slots:", error);
+                            console.error("Response:", xhr.responseText);
                             timeSelect.empty().append('<option value="">Gagal memuat slot.</option>').prop('disabled', true);
                             loadingMessage.text('Gagal memuat slot waktu. Silakan coba lagi.').removeClass('text-success').addClass('text-danger');
+                            try {
+                                var errorResponse = JSON.parse(xhr.responseText);
+                                if (errorResponse && errorResponse.message) {
+                                    // Anda bisa menampilkan ini di tempat yang lebih baik
+                                    alert('Error Server: ' + errorResponse.message);
+                                }
+                            } catch (e) {
+                                // Abaikan jika bukan JSON
+                            }
                         }
                     });
                 } else {
@@ -210,7 +224,6 @@
             if ($('#doctor_id').val() && $('#appointment_date').val()) {
                 loadAvailableSlots();
             } else if ($('#doctor_id').val()) {
-                 // Hanya tampilkan spesialisasi jika dokter terpilih, walau tanggal belum
                 var selectedOption = $('#doctor_id').find('option:selected');
                 var specialty = selectedOption.data('specialty');
                 $('#doctor_specialty_display').text('Spesialisasi: ' + (specialty || '-'));

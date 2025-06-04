@@ -10,6 +10,7 @@ use App\Http\Controllers\Doctor\DashboardController;
 use App\Http\Controllers\DoctorDashboardController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Patient\PatientAppointmentController;
+use App\Http\Controllers\Patient\PatientProfileController;
 use App\Http\Controllers\PatientDashboardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Staff\DoctorAvailabilityController;
@@ -22,27 +23,46 @@ use Illuminate\Support\Facades\Auth; // Tambahkan ini
 // Route Home, bisa diakses tanpa login
 Route::get('/', [HomeController::class, 'index'])->name('home.dashboard');
 
-// Semua rute yang membutuhkan otentikasi (login)
-Route::middleware('auth')->group(function () {
+// Ini adalah rute yang akan menjadi target RouteServiceProvider::HOME atau pengalihan default setelah login.
+Route::get('/dashboard', function () {
+    $user = Auth::user();
 
-    // --- Rute Pengarah Dashboard Utama ---
-    // Route ini akan menangkap semua redirect()->intended(route('dashboard')) dari Breeze
-    // dan mengarahkan user ke dashboard spesifik role mereka setelah login.
-    Route::get('/dashboard', function () {
-        $user = Auth::user();
-        switch ($user->role) {
-            case 'admin':
-                return redirect()->route('admin.index');
-            case 'doctor':
-                return redirect()->route('doctor.dashboard');
-            case 'staff':
-                return redirect()->route('staff.index');
-            case 'patient':
-                return redirect()->route('patient.index');
-            default:
-                    return redirect()->route('home.dashboard'); // Jika ada role lain atau sebagai fallback
+    if (!$user) {
+        // Jika somehow tidak ada user (meskipun harusnya sudah di-middleware 'auth'), redirect ke login
+        return redirect()->route('login');
+    }
+
+    // Logika Pengalihan Berdasarkan Role dan Kelengkapan Profil Pasien
+    if ($user->role === 'patient') {
+        // Jika user adalah pasien, periksa apakah profil pasien sudah lengkap
+        if (!$user->patient) { // Asumsi relasi 'patient' di model User sudah ada
+            // Jika belum ada profil pasien, arahkan untuk membuat profil
+            return redirect()->route('patient.profile.create');
+        } else {
+            // Jika sudah ada profil pasien, arahkan ke dashboard pasien
+            return redirect()->route('patient.index');
         }
-    })->name('dashboard'); // <<--- Pastikan nama route 'dashboard' ini ada!
+    }
+    // Tambahkan logika pengalihan untuk role lain:
+    elseif ($user->role === 'admin') {
+        return redirect()->route('admin.index'); // Ganti dengan rute dashboard admin Anda
+    }
+    elseif ($user->role === 'staff') {
+        return redirect()->route('staff.index'); // Ganti dengan rute dashboard staff Anda
+    }
+    elseif ($user->role === 'doctor') {
+        return redirect()->route('doctor.dashboard'); // Ganti dengan rute dashboard doctor Anda
+    }
+
+        // Fallback jika role tidak ditemukan atau tidak ada rute spesifik
+        return view('home.dashboard'); // Ini bisa jadi dashboard umum atau halaman error/info
+    })->middleware(['auth'])->name('dashboard'); // Pastikan rute ini dilindungi oleh middleware 'auth'
+
+// --- Rute Spesifik untuk Role Pasien ---
+// Rute Dashboard Pasien (akses setelah profil lengkap)
+Route::get('/patient/dashboard', function () {
+    return view('patient.dashboard'); // Pastikan Anda memiliki view ini
+})->name('patient.dashboard')->middleware(['auth', 'check.role:patient']);
 
     // Rute Profile (bawaan Breeze)
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -200,21 +220,41 @@ Route::middleware('auth')->group(function () {
         
     });
 
-    // --- Rute untuk Pasien ---
-    // Prefix 'patient' + path '/dashboard' -> URL: /patient/dashboard
-    Route::group(['prefix' => 'patient', 'middleware' => 'check.role:patient'], function () {
-        Route::get('/dashboard', [App\Http\Controllers\Patient\DashboardController::class, 'index'])->name('patient.index');
 
-        Route::get('/appointments', [App\Http\Controllers\Patient\AppointmentController::class, 'index'])->name('appointments.index');
-        Route::get('/appointments/create', [PatientAppointmentController::class, 'create'])->name('appointments.create'); // Rute untuk form baru
-        Route::post('/appointments', [PatientAppointmentController::class, 'store'])->name('appointments.store');
-        Route::get('/appointments/{appointment}', [PatientAppointmentController::class, 'show'])->name('patient.appointments.show');
-        Route::patch('/appointments/{appointment}/cancel', [PatientAppointmentController::class, 'cancel'])->name('patient.appointments.cancel');
-        Route::get('/appointments/get-available-slots', [PatientAppointmentController::class, 'getAvailableSlots'])->name('appointments.get-available-slots');
+    // Rute untuk mengambil slot janji temu yang tersedia oleh pasien
+    // Diletakkan di sini agar URL-nya /api/available-slots
+    // Pastikan middleware 'auth' dan 'check.role:patient' sesuai dengan kebutuhan Anda
+    Route::get('/api/available-slots', [PatientAppointmentController::class, 'getAvailableSlots'])
+        ->middleware(['auth', 'check.role:patient']) // Sesuaikan middleware jika diperlukan
+        ->name('api.patient.available-slots');
+
+  // --- Rute untuk Pasien (yang sudah Anda berikan sebelumnya) ---
+Route::group(['prefix' => 'patient', 'middleware' => ['auth', 'check.role:patient']], function () {
+    Route::get('/dashboard', [App\Http\Controllers\Patient\DashboardController::class, 'index'])->name('patient.index'); // Sebelumnya name: patient.index
+
+    // Menggunakan PatientAppointmentController untuk konsistensi pada fitur appointment pasien
+    Route::get('/appointments', [PatientAppointmentController::class, 'index'])->name('appointments.index'); // Mengubah nama rute agar lebih deskriptif
+    Route::get('/appointments/create', [PatientAppointmentController::class, 'create'])->name('appointments.create');
+    Route::post('/appointments', [PatientAppointmentController::class, 'store'])->name('appointments.store');
+    Route::get('/appointments/{appointment}', [PatientAppointmentController::class, 'show'])->name('patient.appointments.show');
+    Route::patch('/appointments/{appointment}/cancel', [PatientAppointmentController::class, 'cancel'])->name('patient.appointments.cancel');
+
+
+    //Route untuk membuat profil pasien
+     Route::get('/patient/profile/create', [PatientProfileController::class, 'create'])
+         ->name('patient.profile.create');
+    Route::post('/patient/profile', [PatientProfileController::class, 'store'])
+         ->name('patient.profile.store');
+    // Route untuk edit profil pasien (jika sudah ada tapi belum lengkap)
+    Route::get('/patient/profile/edit', [PatientProfileController::class, 'edit'])
+         ->name('patient.profile.edit');
+    Route::put('/patient/profile', [PatientProfileController::class, 'update'])
+         ->name('patient.profile.update');
+    // Rute get-available-slots yang lama bisa dihapus jika sudah digantikan oleh /api/available-slots
+    // Route::get('/appointments/get-available-slots', [PatientAppointmentController::class, 'getAvailableSlots'])->name('appointments.get-available-slots');
 
         
 
 
     });
-});
 require __DIR__.'/auth.php'; // Rute otentikasi Breeze
