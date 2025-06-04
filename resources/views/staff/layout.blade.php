@@ -72,7 +72,7 @@
                     </div>
                 </li>
 
-                <!-- Logout Button -->
+                  <!-- Tombol Logout -->
                 <li class="nav-item">
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf

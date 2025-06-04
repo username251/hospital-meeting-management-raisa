@@ -74,7 +74,7 @@
                             <tbody>
                                 @foreach ($availabilities as $availability)
                                     <tr>
-                                        <td>{{ $availability->day_name }}</td>
+                                        <td>{{ $availability->day_name_display }}</td>
                                         <td>{{ \Carbon\Carbon::parse($availability->start_time)->format('H:i') }}</td>
                                         <td>{{ \Carbon\Carbon::parse($availability->end_time)->format('H:i') }}</td>
                                         <td>{{ $availability->slot_duration }}</td>

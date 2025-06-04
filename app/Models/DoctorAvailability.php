@@ -20,11 +20,11 @@ class DoctorAvailability extends Model
     ];
 
     // INI BAGIAN PENTING UNTUK MENGATASI ERROR 'format() on string' SAAT EDIT
+  
+
     protected $casts = [
-        'day_of_week' => 'integer',  // Pastikan day_of_week juga di-cast sebagai integer
-        'start_time' => 'datetime',
-        'end_time' => 'datetime',
-        'is_available' => 'boolean', // Ini juga baiknya di-cast sebagai boolean
+        'day_of_week' => 'string',
+        'is_available' => 'boolean',
     ];
 
     public function doctor()

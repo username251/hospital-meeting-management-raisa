@@ -114,14 +114,22 @@ Route::get('/patient/dashboard', function () {
 
 
         //management doctor schedule
-        Route::get('/doctor-schedules', [DoctorScheduleController::class, 'index'])->name('admin.doctor_schedules.index');
-        Route::get('/doctor-schedules/create', [DoctorScheduleController::class, 'create'])->name('admin.doctor_schedules.create');
-        Route::post('/doctor-schedules', [DoctorScheduleController::class, 'store'])->name('admin.doctor_schedules.store');
-        // Route::get('/doctor-schedules/{doctorSchedule}', [DoctorScheduleController::class, 'show'])->name('admin.doctor_schedules.show'); // Opsional
-        Route::get('/doctor-schedules/{doctorSchedule}/edit', [DoctorScheduleController::class, 'edit'])->name('admin.doctor_schedules.edit');
-        Route::put('/doctor-schedules/{doctorSchedule}', [DoctorScheduleController::class, 'update'])->name('admin.doctor_schedules.update');
-        Route::delete('/doctor-schedules/{doctorSchedule}', [DoctorScheduleController::class, 'destroy'])->name('admin.doctor_schedules.destroy');
 
+        Route::get('doctor_schedules', [App\Http\Controllers\Admin\DoctorScheduleController::class, 'index'])->name('doctor_schedules.index');
+        Route::get('doctor_schedules/create', [App\Http\Controllers\Admin\DoctorScheduleController::class, 'create'])->name('doctor_schedules.create');
+        Route::post('doctor_schedules', [App\Http\Controllers\Admin\DoctorScheduleController::class, 'store'])->name('doctor_schedules.store');
+        Route::get('doctor_schedules/{doctorSchedule}/edit', [App\Http\Controllers\Admin\DoctorScheduleController::class, 'edit'])->name('doctor_schedules.edit');
+        Route::put('doctor_schedules/{doctorSchedule}', [App\Http\Controllers\Admin\DoctorScheduleController::class, 'update'])->name('doctor_schedules.update');
+        Route::delete('doctor_schedules/{doctorSchedule}', [App\Http\Controllers\Admin\DoctorScheduleController::class, 'destroy'])->name('doctor_schedules.destroy');
+        Route::patch('doctor_schedules/{doctorSchedule}/toggle-availability', [
+            App\Http\Controllers\Admin\DoctorScheduleController::class, 
+            'toggleAvailability'
+        ])->name('doctor_schedules.toggle_availability');
+        
+        Route::get('doctor_schedules/calendar/view', [
+            App\Http\Controllers\Admin\DoctorScheduleController::class, 
+            'calendar'
+        ])->name('doctor_schedules.calendar');
     });
 
     // --- Rute untuk Dokter ---
