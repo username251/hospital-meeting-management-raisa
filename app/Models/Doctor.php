@@ -18,6 +18,11 @@ class Doctor extends Model
         'consultation_fee',
     ];
 
+
+    public function feedback()
+{
+    return $this->hasMany(Feedback::class);
+}
     public function user()
     {
         return $this->belongsTo(User::class);

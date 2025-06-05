@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\SpecialtyController;
 use App\Http\Controllers\Doctor\DashboardController;
 use App\Http\Controllers\DoctorDashboardController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\Patient\FeedbackController;
 use App\Http\Controllers\Patient\PatientAppointmentController;
 use App\Http\Controllers\Patient\PatientProfileController;
 use App\Http\Controllers\PatientDashboardController;
@@ -137,6 +138,11 @@ Route::get('/patient/dashboard', function () {
     Route::group(['prefix' => 'doctor', 'middleware' => 'check.role:doctor'], function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('doctor.dashboard');
 
+
+        // Rute untuk Profil Dokter
+        Route::get('/profile', [App\Http\Controllers\Doctor\ProfileController::class, 'edit'])->name('doctor.profile.edit');
+        Route::patch('/profile', [App\Http\Controllers\Doctor\ProfileController::class, 'update'])->name('doctor.profile.update');
+        
         // Rute untuk Ringkasan Janji Temu Hari Ini di dashboard dokter
         Route::get('/appointments/today', [DashboardController::class, 'todayAppointments'])->name('doctor.appointments.today');
         Route::patch('/appointments/{appointment}/status', [DashboardController::class, 'updateAppointmentStatus'])->name('doctor.appointments.updateStatus');
@@ -247,6 +253,7 @@ Route::group(['prefix' => 'patient', 'middleware' => ['auth', 'check.role:patien
     Route::get('/appointments/{appointment}', [PatientAppointmentController::class, 'show'])->name('patient.appointments.show');
     Route::patch('/appointments/{appointment}/cancel', [PatientAppointmentController::class, 'cancel'])->name('patient.appointments.cancel');
 
+    
 
     //Route untuk membuat profil pasien
      Route::get('/patient/profile/create', [PatientProfileController::class, 'create'])
@@ -261,7 +268,9 @@ Route::group(['prefix' => 'patient', 'middleware' => ['auth', 'check.role:patien
     // Rute get-available-slots yang lama bisa dihapus jika sudah digantikan oleh /api/available-slots
     // Route::get('/appointments/get-available-slots', [PatientAppointmentController::class, 'getAvailableSlots'])->name('appointments.get-available-slots');
 
-        
+        //route untuk feedback
+         Route::get('/appointments/{appointment}/feedback/create', [FeedbackController::class, 'create'])->name('feedback.create');
+    Route::post('/appointments/{appointment}/feedback', [FeedbackController::class, 'store'])->name('feedback.store');
 
 
     });

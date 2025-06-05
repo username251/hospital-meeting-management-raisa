@@ -29,6 +29,11 @@ protected $fillable = [
     /**
      * Get the user that owns the patient.
      */
+
+     public function feedback()
+{
+    return $this->hasMany(Feedback::class);
+}
     public function user()
     {
         return $this->belongsTo(User::class);

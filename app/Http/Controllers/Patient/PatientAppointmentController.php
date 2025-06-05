@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Patient;
 
 use App\Http\Controllers\Controller;
+use App\Models\Patient;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Appointment;
@@ -52,7 +53,9 @@ class PatientAppointmentController extends Controller
         ->orderBy('start_time')
         ->paginate(10); // Ganti get() dengan paginate(), angka 10 adalah jumlah item per halaman
 
-    return view('patient.appointments.index', compact('appointments'));
+    $doctors = Doctor::with('user')->get(); // Atau query yang lebih spesifik
+
+    return view('patient.appointments.index', compact('appointments', 'doctors'));
 }
 
     public function create()
@@ -252,6 +255,22 @@ class PatientAppointmentController extends Controller
         return view('patient.appointments.show', compact('appointment'));
     }
 
+    public function cancel(Appointment $appointment)
+    {
+        $patient = Patient::where('user_id', Auth::id())->firstOrFail();
+        if ($appointment->patient_id !== $patient->id) {
+            return redirect()->route('appointments.index')->with('error', 'Akses ditolak.');
+        }
+
+        // Hanya boleh dibatalkan jika statusnya pending, confirmed, atau scheduled
+        if (in_array($appointment->status, ['pending', 'confirmed', 'scheduled'])) {
+            $appointment->status = 'cancelled';
+            $appointment->save();
+            return redirect()->route('appointments.index')->with('success', 'Janji temu berhasil dibatalkan.');
+        }
+
+        return redirect()->route('appointments.index')->with('error', 'Janji temu tidak dapat dibatalkan.');
+    }
    
 public function getAvailableSlots(Request $request)
 {

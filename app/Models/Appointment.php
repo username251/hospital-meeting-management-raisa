@@ -29,6 +29,11 @@ class Appointment extends Model
     ];
 
     // Definisi relasi
+
+    public function feedback()
+    {
+    return $this->hasOne(Feedback::class);
+    }
     public function patient()
     {
         return $this->belongsTo(Patient::class);
