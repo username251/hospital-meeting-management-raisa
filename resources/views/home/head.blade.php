@@ -19,8 +19,6 @@
                       @auth
                             @if (auth()->user()->role === 'patient')
                                 <a href="{{ route('appointments.create') }}" class="dropdown-item">Appointment</a>
-                            @else
-                                <a href="" class="dropdown-item">Appointment</a>
                             @endif
                         @else
                             <a href="{{ route('register') }}" class="dropdown-item">Appointment</a>

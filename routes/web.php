@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\DoctorManagementController;
 use App\Http\Controllers\Admin\DoctorScheduleController;
 use App\Http\Controllers\Admin\PatientController;
 use App\Http\Controllers\Admin\SpecialtyController;
+use App\Http\Controllers\ContactController;
 use App\Http\Controllers\Doctor\DashboardController;
 use App\Http\Controllers\DoctorDashboardController;
 use App\Http\Controllers\HomeController;
@@ -18,12 +19,15 @@ use App\Http\Controllers\Staff\DoctorAvailabilityController;
 use App\Http\Controllers\Staff\DoctorController;
 use App\Http\Controllers\Staff\QueueController;
 use App\Http\Controllers\Staff\StaffDashboardController;
+use App\Models\Contact;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth; // Tambahkan ini
 
 // Route Home, bisa diakses tanpa login
 Route::get('/', [HomeController::class, 'index'])->name('home.dashboard');
 
+//Route untuk contact dari pasien
+Route::post('/contact', [ContactController::class, 'store'])->name('contact.store');
 // Ini adalah rute yang akan menjadi target RouteServiceProvider::HOME atau pengalihan default setelah login.
 Route::get('/dashboard', function () {
     $user = Auth::user();

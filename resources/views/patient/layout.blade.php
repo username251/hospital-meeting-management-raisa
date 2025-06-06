@@ -102,14 +102,14 @@
                     @endif
                 @endauth
                 {{-- Tombol Logout standalone yang lama bisa dihapus jika sudah tercover di dropdown --}}
-                {{-- <li class="nav-item">
+                 <li class="nav-item">
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
                         <button type="submit" class="btn btn-link nav-link" style="border: none; padding: 0; color: inherit;">
                             <i class="fas fa-sign-out-alt"></i> Logout
                         </button>
                     </form>
-                </li> --}}
+                </li> 
 
                 <li class="nav-item">
                     <a class="nav-link" data-widget="fullscreen" href="#" role="button">

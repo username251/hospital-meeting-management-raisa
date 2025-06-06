@@ -6,9 +6,11 @@ use App\Models\Appointment;
 use App\Models\Doctor;
 use App\Models\Feedback;
 use App\Models\Specialty;
+use App\Models\Patient;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 
 class HomeController extends Controller
 {
@@ -42,8 +44,22 @@ class HomeController extends Controller
             ->get();
 
         $specialties = Specialty::all();
+
+        // Data statistik sederhana
+        $totalPatients = Patient::count();
+        $totalDoctors = Doctor::count();
+        $consultedPatients = Patient::whereHas('appointments', function($query) {
+            $query->where('status', 'completed');
+        })->count();
         
-        return view('home.index', compact('topDoctors', 'testimonials', 'specialties'));
+        return view('home.index', compact(
+            'topDoctors', 
+            'testimonials', 
+            'specialties',
+            'totalPatients',
+            'totalDoctors',
+            'consultedPatients'
+        ));
     }
 
     public function doctors(Request $request)
@@ -61,5 +77,29 @@ class HomeController extends Controller
         $doctors = $query->get();
 
         return view('doctors.index', compact('doctors'));
+    }
+
+    // Method untuk menampilkan detail pasien (opsional)
+    public function patientStats()
+    {
+        $totalPatients = Patient::count();
+        $activePatients = Patient::whereHas('appointments', function($query) {
+            $query->where('created_at', '>=', now()->subMonths(6));
+        })->count();
+
+        $patientsBySpecialty = Patient::select('specialties.name', DB::raw('COUNT(patients.id) as total'))
+            ->join('appointments', 'patients.id', '=', 'appointments.patient_id')
+            ->join('doctors', 'appointments.doctor_id', '=', 'doctors.id')
+            ->join('specialties', 'doctors.specialty_id', '=', 'specialties.id')
+            ->where('appointments.status', 'completed')
+            ->groupBy('specialties.id', 'specialties.name')
+            ->orderByDesc('total')
+            ->get();
+
+        return response()->json([
+            'totalPatients' => $totalPatients,
+            'activePatients' => $activePatients,
+            'patientsBySpecialty' => $patientsBySpecialty
+        ]);
     }
 }

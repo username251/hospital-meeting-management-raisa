@@ -5,19 +5,19 @@
             <div class="row g-4">
                 <div class="col-sm-4">
                     <div class="border-start border-light ps-4">
-                        <h2 class="text-white mb-1" data-toggle="counter-up">2831</h2>
+                        <h2 class="text-white mb-1" data-toggle="counter-up">{{ $totalDoctors }}</h2>
                         <p class="text-light mb-0">Expert Doctors</p>
                     </div>
                 </div>
                 <div class="col-sm-4">
                     <div class="border-start border-light ps-4">
-                        <h2 class="text-white mb-1" data-toggle="counter-up">1234</h2>
-                        <p class="text-light mb-0">Medical Stuff</p>
+                        <h2 class="text-white mb-1" data-toggle="counter-up">{{ $consultedPatients  }}</h2>
+                        <p class="text-light mb-0">Consultations</p>
                     </div>
                 </div>
                 <div class="col-sm-4">
                     <div class="border-start border-light ps-4">
-                        <h2 class="text-white mb-1" data-toggle="counter-up">4532</h2>
+                        <h2 class="text-white mb-1" data-toggle="counter-up">{{ $totalPatients  }}</h2>
                         <p class="text-light mb-0">Total Patients</p>
                     </div>
                 </div>
@@ -294,45 +294,32 @@
                         <h5 class="mb-0">+012 345 6789</h5>
                     </div>
                 </div>
-                <div class="bg-light rounded d-flex align-items-center p-5">
+                <div class="bg-light rounded d-flex align-items-center p-4">
                     <div class="d-flex flex-shrink-0 align-items-center justify-content-center rounded-circle bg-white" style="width: 55px; height: 55px;">
-                        <i class="fa fa-envelope-open text-primary"></i>
+                        <i class="fa fa-envelope text-primary"></i>
                     </div>
-                    <div class="ms-4">
-                        <p class="mb-2">Mail Us Now</p>
-                        <h5 class="mb-0">info@example.com</h5>
+                    <div class="ms-3">
+                        <h5 class="mb-1">Email Us</h5>
+                        <p class="mb-0">info@example.com</p>
                     </div>
                 </div>
             </div>
             <div class="col-lg-6 wow fadeInUp" data-wow-delay="0.5s">
-                <div class="bg-light rounded p-5">
-                    <p class="d-inline-block border rounded-pill py-1 px-4">Contact Us</p>
-                    <h1 class="mb-4">Get in Touch</h1>
-                    <form>
+                <div class="bg-light rounded h-100 d-flex align-items-center p-5">
+                    <form action="{{ route('contact.store') }}" method="POST">
+                        @csrf
                         <div class="row g-3">
-                            <div class="col-md-6">
-                                <div class="form-floating">
-                                    <input type="text" class="form-control" id="name" placeholder="Your Name">
-                                    <label for="name">Your Name</label>
-                                </div>
+                            <div class="col-12 col-sm-6">
+                                <input type="text" name="name" class="form-control border-0" placeholder="Your Name" style="height: 55px;" required>
                             </div>
-                            <div class="col-md-6">
-                                <div class="form-floating">
-                                    <input type="email" class="form-control" id="email" placeholder="Your Email">
-                                    <label for="email">Your Email</label>
-                                </div>
+                            <div class="col-12 col-sm-6">
+                                <input type="email" name="email" class="form-control border-0" placeholder="Your Email" style="height: 55px;" required>
                             </div>
                             <div class="col-12">
-                                <div class="form-floating">
-                                    <input type="text" class="form-control" id="subject" placeholder="Subject">
-                                    <label for="subject">Subject</label>
-                                </div>
+                                <input type="text" name="subject" class="form-control border-0" placeholder="Subject" style="height: 55px;" required>
                             </div>
                             <div class="col-12">
-                                <div class="form-floating">
-                                    <textarea class="form-control" placeholder="Leave a message here" id="message" style="height: 100px"></textarea>
-                                    <label for="message">Message</label>
-                                </div>
+                                <textarea name="message" class="form-control border-0" rows="5" placeholder="Message" required></textarea>
                             </div>
                             <div class="col-12">
                                 <button class="btn btn-primary w-100 py-3" type="submit">Send Message</button>
@@ -417,6 +404,10 @@
                     </div>
                 </div>
 
+                <div class="testimonial-item text-center">
+                    <div class="bg-light rounded-circle p-2 mx-auto mb-4 d-flex align-items-center justify-content-center" 
+                         style="width: 100px; height: 100px;">
+                        <i class="fa fa-user text-primary fs-2"></i>
                 <div class="testimonial-item text-center">
                     <div class="bg-light rounded-circle p-2 mx-auto mb-4 d-flex align-items-center justify-content-center" 
                          style="width: 100px; height: 100px;">

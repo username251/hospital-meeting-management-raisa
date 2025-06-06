@@ -1,4 +1,4 @@
-  <!-- Footer Start -->
+<!-- Footer Start -->
     <div class="container-fluid bg-dark text-light footer mt-5 pt-5 wow fadeIn" data-wow-delay="0.1s">
         <div class="container py-5">
             <div class="row g-5">
@@ -16,19 +16,24 @@
                 </div>
                 <div class="col-lg-3 col-md-6">
                     <h5 class="text-light mb-4">Services</h5>
-                    <a class="btn btn-link" href="">Cardiology</a>
-                    <a class="btn btn-link" href="">Pulmonary</a>
-                    <a class="btn btn-link" href="">Neurology</a>
-                    <a class="btn btn-link" href="">Orthopedics</a>
-                    <a class="btn btn-link" href="">Laboratory</a>
+                    @if(isset($specialties) && $specialties->count() > 0)
+                        @foreach($specialties->take(5) as $specialty)
+                            <a class="btn btn-link" href="">{{ $specialty->name }}</a>
+                        @endforeach
+                    @else
+                        <!-- Fallback jika tidak ada specialty -->
+                        <a class="btn btn-link" href="">Cardiology</a>
+                        <a class="btn btn-link" href="">Pulmonary</a>
+                        <a class="btn btn-link" href="">Neurology</a>
+                        <a class="btn btn-link" href="">Orthopedics</a>
+                        <a class="btn btn-link" href="">Laboratory</a>
+                    @endif
                 </div>
                 <div class="col-lg-3 col-md-6">
                     <h5 class="text-light mb-4">Quick Links</h5>
-                    <a class="btn btn-link" href="">About Us</a>
-                    <a class="btn btn-link" href="">Contact Us</a>
-                    <a class="btn btn-link" href="">Our Services</a>
-                    <a class="btn btn-link" href="">Terms & Condition</a>
-                    <a class="btn btn-link" href="">Support</a>
+                    <a class="btn btn-link" href="#about-section">About Us</a>
+                    <a class="btn btn-link" href="#contact-section">Contact Us</a>
+                    <a class="btn btn-link" href="#service-section">Our Services</a>
                 </div>
                 <div class="col-lg-3 col-md-6">
                     <h5 class="text-light mb-4">Newsletter</h5>
