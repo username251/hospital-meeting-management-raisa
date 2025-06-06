@@ -25,7 +25,7 @@
             </div>
             <div class="card-body">
                 {{-- Pastikan ada data $patient yang di-passing dari controller --}}
-                <form action="{{ route('patient.profile.update') }}" method="POST">
+                <form action="{{ route('patient.profile.update') }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     @method('PUT') {{-- Gunakan method PUT untuk update --}}
 
@@ -34,6 +34,32 @@
                         <h5><i class="icon fas fa-info"></i> Info!</h5>
                         Informasi di bawah ini adalah detail profil Anda. Harap isi dengan benar.
                     </div>
+
+                    {{-- Profile Picture Section --}}
+                    <div class="form-group">
+                        <label for="profile_picture">Foto Profil</label>
+                        
+                        {{-- Tampilkan foto saat ini jika ada --}}
+                        @if($patient->profile_picture)
+                            <div class="mb-3">
+                                <img src="{{ asset('storage/' . $patient->profile_picture) }}" 
+                                     alt="Profile Picture" 
+                                     class="img-thumbnail" 
+                                     style="max-width: 150px; max-height: 150px;">
+                                <p class="text-muted mt-1">Foto profil saat ini</p>
+                            </div>
+                        @endif
+                        
+                        <input type="file" name="profile_picture" id="profile_picture" class="form-control-file @error('profile_picture') is-invalid @enderror" accept="image/*">
+                        <small class="form-text text-muted">Pilih foto baru untuk mengganti foto profil (JPG, PNG, GIF, maksimal 2MB)</small>
+                        @error('profile_picture')
+                            <span class="invalid-feedback" role="alert">
+                                <strong>{{ $message }}</strong>
+                            </span>
+                        @enderror
+                    </div>
+
+                    <hr>
 
                     {{-- Informasi Akun User (Name & Email) --}}
                     <div class="form-group">
@@ -168,4 +194,47 @@
         </div>
     </section>
 </div>
+
+{{-- JavaScript untuk preview gambar dan validasi --}}
+<script>
+document.getElementById('profile_picture').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        // Cek ukuran file (2MB = 2048KB)
+        if (file.size > 2048 * 1024) {
+            alert('Ukuran file terlalu besar. Maksimal 2MB.');
+            this.value = '';
+            return;
+        }
+        
+        // Cek tipe file
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif'];
+        if (!allowedTypes.includes(file.type)) {
+            alert('Tipe file tidak didukung. Gunakan JPG, PNG, atau GIF.');
+            this.value = '';
+            return;
+        }
+        
+        // Preview gambar (opsional)
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            // Cari img existing atau buat baru
+            let existingImg = document.querySelector('.img-thumbnail');
+            if (existingImg) {
+                existingImg.src = e.target.result;
+            } else {
+                // Buat preview baru jika belum ada gambar
+                const previewDiv = document.createElement('div');
+                previewDiv.className = 'mb-3';
+                previewDiv.innerHTML = `
+                    <img src="${e.target.result}" alt="Preview" class="img-thumbnail" style="max-width: 150px; max-height: 150px;">
+                    <p class="text-muted mt-1">Preview foto baru</p>
+                `;
+                document.getElementById('profile_picture').parentNode.insertBefore(previewDiv, document.getElementById('profile_picture'));
+            }
+        };
+        reader.readAsDataURL(file);
+    }
+});
+</script>
 @endsection

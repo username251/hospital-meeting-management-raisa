@@ -66,6 +66,13 @@ class User extends Authenticatable
         return $this->hasOne(Doctor::class);
     }
 
+    public function feedback()
+    {
+    return $this->hasMany(Feedback::class);
+    }
+
+    
+    
     // Tambahkan relasi untuk staff jika kamu memiliki tabel staff_details
     // public function staff(): HasOne
     // {

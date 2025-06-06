@@ -28,6 +28,11 @@
 
     {{-- Menggunakan asset() helper untuk aset lokal --}}
     <link href="{{ asset('css/style.css') }}" rel="stylesheet">
+    <style>
+    html {
+        scroll-behavior: smooth;
+}
+</style>
 </head>
 
 <body>

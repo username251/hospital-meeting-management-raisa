@@ -38,7 +38,7 @@ class AuthenticatedSessionController extends Controller
             $request->session()->regenerate();
 
             // Ubah baris ini:
-            return redirect()->intended(route('dashboard')); // Mengarahkan ke rute bernama 'dashboard'
+            return redirect()->intended(route('home.dashboard')); // Mengarahkan ke rute bernama 'dashboard'
         }
 
         throw ValidationException::withMessages([

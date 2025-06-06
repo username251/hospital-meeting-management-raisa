@@ -30,8 +30,22 @@
                     Anda perlu melengkapi profil Anda sebelum dapat mengakses dashboard.
                 </div>
 
-                <form action="{{ route('patient.profile.store') }}" method="POST">
+                <form action="{{ route('patient.profile.store') }}" method="POST" enctype="multipart/form-data">
                     @csrf
+
+                    {{-- Profile Picture Section --}}
+                    <div class="form-group">
+                        <label for="profile_picture">Foto Profil</label>
+                        <input type="file" name="profile_picture" id="profile_picture" class="form-control-file @error('profile_picture') is-invalid @enderror" accept="image/*">
+                        <small class="form-text text-muted">Pilih foto profil Anda (JPG, PNG, GIF, maksimal 2MB)</small>
+                        @error('profile_picture')
+                            <span class="invalid-feedback" role="alert">
+                                <strong>{{ $message }}</strong>
+                            </span>
+                        @enderror
+                    </div>
+
+                    <hr>
 
                     {{-- Fields dari tabel `patients` --}}
                     <div class="form-group">
@@ -127,4 +141,27 @@
         </div>
     </section>
 </div>
+
+{{-- JavaScript untuk preview gambar (opsional) --}}
+<script>
+document.getElementById('profile_picture').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        // Cek ukuran file (2MB = 2048KB)
+        if (file.size > 2048 * 1024) {
+            alert('Ukuran file terlalu besar. Maksimal 2MB.');
+            this.value = '';
+            return;
+        }
+        
+        // Cek tipe file
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif'];
+        if (!allowedTypes.includes(file.type)) {
+            alert('Tipe file tidak didukung. Gunakan JPG, PNG, atau GIF.');
+            this.value = '';
+            return;
+        }
+    }
+});
+</script>
 @endsection

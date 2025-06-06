@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use App\Models\Patient;
 use App\Models\User; // Pastikan model User di-import
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 
 class PatientProfileController extends Controller
@@ -45,14 +46,18 @@ class PatientProfileController extends Controller
             'date_of_birth' => 'required|date',
             'address' => 'required|string',
             'gender' => ['required', Rule::in(['Male', 'Female', 'Other'])],
-            // 'phone_number' di tabel 'users' jika ingin disinkronkan dari form ini
-            // Jika Anda hanya ingin mengisi 'phone' di tabel 'patients', ini bisa dihapus dari validasi request
-            // 'phone_number' => 'nullable|string|max:255',
             'medical_history' => 'nullable|string',
             'allergies' => 'nullable|string',
             'current_medications' => 'nullable|string',
             'blood_type' => 'nullable|string|max:5',
+            'profile_picture' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'], // Validasi untuk gambar
         ]);
+
+        // Proses upload foto profil jika ada
+        $profilePicturePath = null;
+        if ($request->hasFile('profile_picture')) {
+            $profilePicturePath = $request->file('profile_picture')->store('profile_pictures/patients', 'public');
+        }
 
         // Buat profil pasien baru
         Patient::create([
@@ -65,15 +70,8 @@ class PatientProfileController extends Controller
             'allergies' => $request->allergies,
             'current_medications' => $request->current_medications,
             'blood_type' => $request->blood_type,
+            'profile_picture' => $profilePicturePath,
         ]);
-
-        // Opsional: Sinkronkan phone_number ke tabel users jika ada di form
-        // if ($request->has('phone_number')) {
-        //     $user->update(['phone_number' => $request->phone_number]);
-        // } else if ($request->has('phone')) {
-        //     // Jika phone_number di tabel users juga diisi dari field 'phone' di tabel patients
-        //     $user->update(['phone_number' => $request->phone]);
-        // }
 
         // Arahkan ke dashboard setelah profil dibuat
         return redirect()->route('patient.index')->with('success', 'Profil berhasil dibuat!');
@@ -123,25 +121,35 @@ class PatientProfileController extends Controller
             'date_of_birth' => 'required|date',
             'address' => 'required|string',
             'gender' => ['required', Rule::in(['Male', 'Female', 'Other'])],
-            // 'phone_number' => 'nullable|string|max:255', // Ini untuk kolom di tabel users (jika ingin diupdate)
             'medical_history' => 'nullable|string',
             'allergies' => 'nullable|string',
             'current_medications' => 'nullable|string',
             'blood_type' => 'nullable|string|max:5',
+            'profile_picture' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'], // Validasi untuk gambar
         ]);
 
         // Update data User
         $user->update([
             'name' => $request->name,
             'email' => $request->email,
-            // 'phone_number' => $request->phone_number, // Opsional: update phone_number di tabel users
-            // Atau jika 'phone_number' di tabel 'users' sama dengan 'phone' di tabel 'patients'
             'phone_number' => $request->phone,
         ]);
 
         // Jika password diisi, update password
         if ($request->filled('password')) {
             $user->update(['password' => Hash::make($request->password)]);
+        }
+
+        // Proses upload foto profil jika ada
+        if ($request->hasFile('profile_picture')) {
+            // Hapus foto lama jika ada
+            if ($patient->profile_picture && Storage::disk('public')->exists($patient->profile_picture)) {
+                Storage::disk('public')->delete($patient->profile_picture);
+            }
+
+            // Simpan foto baru dan dapatkan path-nya
+            $path = $request->file('profile_picture')->store('profile_pictures/patients', 'public');
+            $patient->profile_picture = $path;
         }
 
         // Update data Patient
@@ -154,7 +162,6 @@ class PatientProfileController extends Controller
             'allergies' => $request->allergies,
             'current_medications' => $request->current_medications,
             'blood_type' => $request->blood_type,
-            // 'phone_number' => $request->phone_number, // Jika ada di tabel patients dan beda dari 'phone'
         ]);
 
         return redirect()->route('patient.index')->with('success', 'Profil berhasil diperbarui!');

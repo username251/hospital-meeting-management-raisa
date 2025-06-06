@@ -59,6 +59,7 @@ Route::get('/dashboard', function () {
         return view('home.dashboard'); // Ini bisa jadi dashboard umum atau halaman error/info
     })->middleware(['auth'])->name('dashboard'); // Pastikan rute ini dilindungi oleh middleware 'auth'
 
+
 // --- Rute Spesifik untuk Role Pasien ---
 // Rute Dashboard Pasien (akses setelah profil lengkap)
 Route::get('/patient/dashboard', function () {
@@ -74,9 +75,7 @@ Route::get('/patient/dashboard', function () {
     // Dilindungi oleh 'auth' (karena di dalam group middleware 'auth') DAN 'check.role:admin'
     Route::group(['prefix' => 'admin', 'middleware' => 'check.role:admin'], function () {
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('admin.index');
-        Route::get('/form', [AdminDashboardController::class, 'form'])->name( 'admin.form');
-        Route::get('/table', [AdminDashboardController::class, 'table'])->name('admin.table');
-
+        
         //doctor managment
         Route::get('/doctors/create', [DoctorManagementController::class, 'create'])->name('admin.doctors.create');
         Route::post('/doctors', [DoctorManagementController::class, 'store'])->name('admin.doctors.store');
@@ -136,7 +135,18 @@ Route::get('/patient/dashboard', function () {
     // --- Rute untuk Dokter ---
     // Prefix 'doctor' + path '/dashboard' -> URL: /doctor/dashboard
     Route::group(['prefix' => 'doctor', 'middleware' => 'check.role:doctor'], function () {
-        Route::get('/dashboard', [DashboardController::class, 'index'])->name('doctor.dashboard');
+         Route::get('/dashboard', [DashboardController::class, 'index'])->name('doctor.dashboard');
+    
+        // Today's Appointments
+        Route::get('/appointments/today', [DashboardController::class, 'todayAppointments'])->name('appointments.today');
+        
+        // Update Appointment Status
+        Route::patch('/appointments/{appointment}/status', [DashboardController::class, 'updateAppointmentStatus'])->name('appointments.update-status');
+        
+        // AJAX Endpoints for real-time updates
+        Route::get('/api/upcoming-appointments', [DashboardController::class, 'getUpcomingAppointments'])->name('api.upcoming-appointments');
+        Route::get('/api/dashboard-stats', [DashboardController::class, 'getDashboardStats'])->name('api.dashboard-stats');
+    
 
 
         // Rute untuk Profil Dokter
