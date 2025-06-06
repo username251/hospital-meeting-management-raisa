@@ -20,14 +20,16 @@
     </section>
 
     <section class="content">
-        <div class="card">
-            <div class="card-header">
-                <h3 class="card-title">Daftar Janji Temu</h3>
-                <div class="card-tools">
-                    <a href="{{ route('admin.appointments.create') }}" class="btn btn-primary btn-sm">Tambah Janji Temu</a>
+             <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Daftar Janji Temu Saya</h3>
+                    <div class="card-tools">
+                        <a href="{{ route('appointments.create') }}" class="btn btn-primary btn-sm">
+                            <i class="fas fa-plus"></i> Jadwalkan Janji Temu Baru
+                        </a>
+                    </div>
                 </div>
-            </div>
-            <div class="card-body">
+                <div class="card-body">
                 <div class="table-responsive">
                     <table class="table table-bordered table-striped">
                         <thead>

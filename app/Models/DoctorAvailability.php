@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Carbon\Carbon;
 
 class DoctorAvailability extends Model
 {
@@ -19,11 +19,9 @@ class DoctorAvailability extends Model
         'is_available',
     ];
 
-    // INI BAGIAN PENTING UNTUK MENGATASI ERROR 'format() on string' SAAT EDIT
-  
-
     protected $casts = [
-        'day_of_week' => 'string',
+        'start_time' => 'datetime:H:i:s',
+        'end_time' => 'datetime:H:i:s',
         'is_available' => 'boolean',
     ];
 
@@ -32,125 +30,134 @@ class DoctorAvailability extends Model
         return $this->belongsTo(Doctor::class);
     }
 
-      /**
-     * Get available time slots for a given doctor and date.
-     *
-     * @param int $doctorId
-     * @param string $appointmentDate (YYYY-MM-DD)
-     * @return array
+    /**
+     * Get available time slots for a doctor on a specific date
+     * dengan filtering waktu yang sudah lewat
      */
-    public static function getAvailableSlots($doctorId, $appointmentDate)
+    public static function getAvailableSlots($doctorId, $date)
     {
-        $date = Carbon::parse($appointmentDate);
-        $dayOfWeekInteger = $date->dayOfWeek; // 0 for Sunday, 1 for Monday, etc.
-
-        // Mapping from Carbon's dayOfWeek integer to English day name string
-        $daysMapping = [
-            0 => 'Sunday',
-            1 => 'Monday',
-            2 => 'Tuesday',
-            3 => 'Wednesday',
-            4 => 'Thursday',
-            5 => 'Friday',
-            6 => 'Saturday',
-        ];
-
-        // Get the doctor's availability for the specific day
-        // We check for both integer and string representation of day_of_week if your data is mixed
-        $availabilities = self::where('doctor_id', $doctorId)
-            ->where(function ($query) use ($dayOfWeekInteger, $daysMapping) {
-                $query->where('day_of_week', (string)$dayOfWeekInteger) // Check as string number '0', '1', etc.
-                      ->orWhere('day_of_week', $daysMapping[$dayOfWeekInteger]); // Check as English day name 'Sunday', 'Monday', etc.
-            })
+        $dayOfWeek = Carbon::parse($date)->format('l'); // Monday, Tuesday, etc.
+        $now = Carbon::now();
+        $requestedDate = Carbon::parse($date);
+        
+        // Get doctor's availability for the requested day
+        $availability = self::where('doctor_id', $doctorId)
+            ->where('day_of_week', $dayOfWeek)
             ->where('is_available', true)
-            ->orderBy('start_time')
-            ->get();
+            ->first();
 
-        $allGeneratedSlots = [];
+        if (!$availability) {
+            return [];
+        }
 
-        foreach ($availabilities as $availability) {
-            $start = Carbon::parse($availability->start_time);
-            $end = Carbon::parse($availability->end_time);
-            $duration = $availability->slot_duration;
+        // Parse times
+        $startTime = Carbon::parse($availability->start_time);
+        $endTime = Carbon::parse($availability->end_time);
+        $slotDuration = $availability->slot_duration;
 
-            // Generate slots within the availability range
-            while ($start->copy()->addMinutes($duration)->lessThanOrEqualTo($end)) {
-                $slotStart = $start->format('H:i:s'); // Use H:i:s as per your appointments table
-                $slotEnd = $start->copy()->addMinutes($duration)->format('H:i:s'); // Use H:i:s
-                $allGeneratedSlots[] = [
+        // Generate time slots
+        $slots = [];
+        $current = $startTime->copy();
+        
+        while ($current->lt($endTime)) {
+            $slotStart = $current->format('H:i:s');
+            $slotEnd = $current->copy()->addMinutes($slotDuration);
+            
+            // Pastikan slot tidak melebihi waktu selesai praktek
+            if ($slotEnd->gt($endTime)) {
+                break;
+            }
+
+            // FILTER WAKTU: Untuk hari ini, skip slot yang sudah lewat
+            if ($requestedDate->isToday()) {
+                $slotDateTime = Carbon::parse($date . ' ' . $slotStart);
+                if ($slotDateTime->lte($now)) {
+                    $current->addMinutes($slotDuration);
+                    continue; // Skip slot yang sudah lewat
+                }
+            }
+
+            // Check if slot is already booked
+            $isBooked = \App\Models\Appointment::where('doctor_id', $doctorId)
+                ->whereDate('appointment_date', $date)
+                ->where('start_time', '<=', $slotStart)
+                ->where('end_time', '>', $slotStart)
+                ->whereIn('status', ['pending', 'scheduled', 'confirmed', 'check-in', 'waiting', 'in-consultation'])
+                ->exists();
+
+            // Check if slot is blocked
+            $isBlocked = \App\Models\BlockedSlot::where('doctor_id', $doctorId)
+                ->where('blocked_date', $date)
+                ->where('start_time', '<=', $slotStart)
+                ->where('end_time', '>', $slotStart)
+                ->exists();
+
+            // Only add slot if it's not booked and not blocked
+            if (!$isBooked && !$isBlocked) {
+                $slots[] = [
                     'start' => $slotStart,
-                    'end' => $slotEnd,
-                    'duration' => $duration,
+                    'end' => $slotEnd->format('H:i:s'),
                 ];
-                $start->addMinutes($duration);
             }
+
+            $current->addMinutes($slotDuration);
         }
 
-        // --- Filter out booked slots ---
-        // Get existing appointments for the selected doctor on the selected date
-        $bookedAppointments = Appointment::where('doctor_id', $doctorId)
-            ->whereDate('appointment_date', $appointmentDate)
-            ->whereIn('status', ['pending', 'confirmed', 'scheduled', 'check-in', 'waiting', 'in-consultation']) // Only consider actively booked slots
-            ->get();
+        return $slots;
+    }
 
-        $bookedSlots = [];
-        foreach ($bookedAppointments as $appointment) {
-            // Store the start and end time of booked appointments
-            $bookedSlots[] = [
-                'start' => Carbon::parse($appointment->start_time)->format('H:i:s'),
-                'end' => Carbon::parse($appointment->end_time)->format('H:i:s'),
-            ];
+    /**
+     * Check if a specific time slot is available
+     * dengan validasi waktu yang sudah lewat
+     */
+    public static function isSlotAvailable($doctorId, $date, $startTime, $endTime)
+    {
+        $now = Carbon::now();
+        $requestedDate = Carbon::parse($date);
+        $slotDateTime = Carbon::parse($date . ' ' . $startTime);
+
+        // VALIDASI: Cek apakah slot sudah lewat
+        if ($slotDateTime->lte($now)) {
+            return false; // Slot sudah lewat
         }
 
-        // --- Filter out blocked slots ---
-        // Get explicitly blocked slots for the selected doctor on the selected date
-        $blockedSlots = BlockedSlot::where('doctor_id', $doctorId)
-            ->where('blocked_date', $appointmentDate)
-            ->get();
+        $dayOfWeek = $requestedDate->format('l');
+        
+        // Check if doctor has availability on this day
+        $availability = self::where('doctor_id', $doctorId)
+            ->where('day_of_week', $dayOfWeek)
+            ->where('is_available', true)
+            ->where('start_time', '<=', $startTime)
+            ->where('end_time', '>=', $endTime)
+            ->first();
 
-        $blockedTimeRanges = [];
-        foreach ($blockedSlots as $blocked) {
-            $blockedTimeRanges[] = [
-                'start' => Carbon::parse($blocked->start_time),
-                'end' => Carbon::parse($blocked->end_time),
-            ];
+        if (!$availability) {
+            return false;
         }
 
-        $filteredSlots = [];
-        foreach ($allGeneratedSlots as $slot) {
-            $slotStart = Carbon::parse($slot['start']);
-            $slotEnd = Carbon::parse($slot['end']);
+        // Check for conflicting appointments
+        $hasConflict = \App\Models\Appointment::where('doctor_id', $doctorId)
+            ->whereDate('appointment_date', $date)
+            ->where(function ($query) use ($startTime, $endTime) {
+                $query->where('start_time', '<', $endTime)
+                      ->where('end_time', '>', $startTime);
+            })
+            ->whereIn('status', ['pending', 'scheduled', 'confirmed', 'check-in', 'waiting', 'in-consultation'])
+            ->exists();
 
-            $isBooked = false;
-            foreach ($bookedSlots as $booked) {
-                $bookedStart = Carbon::parse($booked['start']);
-                $bookedEnd = Carbon::parse($booked['end']);
-
-                // Check for overlap: (StartA < EndB) and (EndA > StartB)
-                if ($slotStart->lt($bookedEnd) && $slotEnd->gt($bookedStart)) {
-                    $isBooked = true;
-                    break;
-                }
-            }
-
-            if ($isBooked) {
-                continue; // Skip this slot if it's booked
-            }
-
-            $isBlocked = false;
-            foreach ($blockedTimeRanges as $blockedRange) {
-                // Check for overlap with blocked slots
-                if ($slotStart->lt($blockedRange['end']) && $slotEnd->gt($blockedRange['start'])) {
-                    $isBlocked = true;
-                    break;
-                }
-            }
-
-            if (!$isBlocked) {
-                $filteredSlots[] = $slot; // Add slot if not blocked and not booked
-            }
+        if ($hasConflict) {
+            return false;
         }
 
-        return $filteredSlots;
+        // Check for blocked slots
+        $isBlocked = \App\Models\BlockedSlot::where('doctor_id', $doctorId)
+            ->where('blocked_date', $date)
+            ->where(function ($query) use ($startTime, $endTime) {
+                $query->where('start_time', '<', $endTime)
+                      ->where('end_time', '>', $startTime);
+            })
+            ->exists();
+
+        return !$isBlocked;
     }
 }

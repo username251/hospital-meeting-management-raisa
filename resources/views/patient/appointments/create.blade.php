@@ -188,11 +188,12 @@
                                     // 'slot.start' akan menjadi value (H:i:s)
                                     // 'slot.display' akan menjadi teks yang terlihat (H:i - H:i)
                                     var isSelected = (slot.start == "{{ old('start_time_slot') }}"); // UBAH old() di sini
-                                    timeSelect.append('<option value="' + slot.start + '" ' + (isSelected ? 'selected' : '') + '>' + slot.display + '</option>');
-                                });
+                                // Dalam script AJAX success callback, pastikan slot.start dalam format H:i:s
+                                timeSelect.append('<option value="' + slot.start + '" ' + (isSelected ? 'selected' : '') + '>' + slot.display + '</option>');                                });
                                 timeSelect.prop('disabled', false);
                                 loadingMessage.text('Slot waktu tersedia.').removeClass('text-danger').addClass('text-success');
-                            } else {
+                            } else 
+                            {
                                 timeSelect.append('<option value="">Tidak ada slot tersedia untuk tanggal dan dokter ini.</option>');
                                 timeSelect.prop('disabled', true);
                                 loadingMessage.text('Tidak ada slot tersedia.').removeClass('text-success').addClass('text-danger');

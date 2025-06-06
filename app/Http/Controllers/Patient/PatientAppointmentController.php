@@ -15,21 +15,18 @@ use Log;
 
 class PatientAppointmentController extends Controller
 {
-   public function index(Request $request) // Tambahkan Request jika Anda ingin menerima input untuk filter atau halaman
+   public function index(Request $request)
 {
     $user = Auth::user();
     if (!$user || !$user->patient) {
-        // Arahkan ke halaman lengkapi profil jika profil pasien tidak ada
         return redirect()->route('patient.profile.create')->with('warning', 'Silakan lengkapi profil Anda terlebih dahulu.');
     }
 
-    // Atau jika Anda ingin mengecek kelengkapan profil yang lebih detail
     $user = Auth::user();
     if (!$user || !$user->patient) {
         return redirect()->route('patient.profile.create')->with('warning', 'Silakan lengkapi profil Anda terlebih dahulu.');
     }
 
-    // Cek kelengkapan data profil (opsional)
     $patient = $user->patient;
     $isProfileComplete = $patient->phone && 
                         $patient->date_of_birth && 
@@ -41,19 +38,18 @@ class PatientAppointmentController extends Controller
     }
     $patientId = $user->patient->id;
 
-    $query = Appointment::with(['doctor.user', 'specialty']) // Pastikan relasi specialty ada di model Appointment
+    $query = Appointment::with(['doctor.user', 'specialty'])
         ->where('patient_id', $patientId);
 
-    // Contoh jika Anda ingin menambahkan filter status dari request
     if ($request->filled('status')) {
         $query->where('status', $request->status);
     }
 
     $appointments = $query->orderByDesc('appointment_date')
         ->orderBy('start_time')
-        ->paginate(10); // Ganti get() dengan paginate(), angka 10 adalah jumlah item per halaman
+        ->paginate(10);
 
-    $doctors = Doctor::with('user')->get(); // Atau query yang lebih spesifik
+    $doctors = Doctor::with('user')->get();
 
     return view('patient.appointments.index', compact('appointments', 'doctors'));
 }
@@ -68,7 +64,7 @@ class PatientAppointmentController extends Controller
 {
     $validatedData = $request->validate([
         'doctor_id' => 'required|exists:doctors,id',
-        'appointment_date' => 'required|date|after_or_equal:today', // Pastikan ini diterima dalam format YYYY-MM-DD
+        'appointment_date' => 'required|date|after_or_equal:today',
         'start_time_slot' => 'required|date_format:H:i:s',
         'reason' => 'nullable|string|max:255',
     ]);
@@ -87,32 +83,37 @@ class PatientAppointmentController extends Controller
     $patientId = $patientProfile->id;
 
     $doctorId = $validatedData['doctor_id'];
-    $appointmentDate = $validatedData['appointment_date']; // Ini seharusnya "2025-05-03"
+    $appointmentDate = $validatedData['appointment_date'];
     $startTime = $validatedData['start_time_slot'];
+
+    // PERBAIKAN: Pastikan format waktu yang benar
+    Log::info("PatientAppointmentController@store - Data yang diterima:", [
+        'doctor_id' => $doctorId,
+        'appointment_date' => $appointmentDate,
+        'start_time_slot' => $startTime,
+        'start_time_type' => gettype($startTime),
+        'start_time_length' => strlen($startTime)
+    ]);
 
     $doctor = Doctor::findOrFail($doctorId);
 
-    // ---- TAMBAHKAN LOG DI SINI ----
     $dayOfWeek = Carbon::parse($appointmentDate)->format('l');
     Log::info("PatientAppointmentController@store - Mencari jadwal untuk:", [
         'doctor_id' => $doctorId,
-        'input_appointment_date' => $appointmentDate, // Lihat format tanggal yang diterima
-        'derived_day_of_week' => $dayOfWeek,         // Lihat hari yang di-derive
+        'input_appointment_date' => $appointmentDate,
+        'derived_day_of_week' => $dayOfWeek,
         'is_available_check' => true
     ]);
-    // ---- AKHIR DARI LOG ----
 
     $availability = DoctorAvailability::where('doctor_id', $doctorId)
                         ->where('day_of_week', $dayOfWeek)
                         ->where('is_available', true)
                         ->first();
 
-    // ---- TAMBAHKAN LOG HASIL QUERY ----
     if ($availability) {
         Log::info("PatientAppointmentController@store - Jadwal DITEMUKAN:", $availability->toArray());
     } else {
         Log::warning("PatientAppointmentController@store - Jadwal TIDAK DITEMUKAN. Querying for doctor_id: {$doctorId}, day_of_week: '{$dayOfWeek}', is_available: true");
-        // Untuk debug lebih lanjut, kita bisa coba query tanpa is_available atau day_of_week
         $anyAvailabilityForDay = DoctorAvailability::where('doctor_id', $doctorId)
                                         ->where('day_of_week', $dayOfWeek)
                                         ->get();
@@ -121,10 +122,8 @@ class PatientAppointmentController extends Controller
         $allDoctorAvailability = DoctorAvailability::where('doctor_id', $doctorId)->get();
         Log::info("PatientAppointmentController@store - Semua jadwal untuk doctor_id: {$doctorId}:", $allDoctorAvailability->toArray());
     }
-    // ---- AKHIR DARI LOG HASIL QUERY ----
 
-
-    if (!$availability) { // Kondisi ini tetap, tapi pesan error di log akan lebih detail
+    if (!$availability) {
         return back()->withInput()->with('error', 'Jadwal dokter tidak ditemukan untuk hari yang dipilih. Pastikan dokter tersedia pada hari tersebut.');
     }
 
@@ -132,51 +131,82 @@ class PatientAppointmentController extends Controller
         Log::error("PatientAppointmentController@store: Durasi slot tidak valid untuk Doctor ID {$doctorId}, Availability ID {$availability->id}. Duration: {$availability->slot_duration}");
         return back()->withInput()->with('error', 'Durasi slot untuk jadwal dokter ini tidak valid.');
     }
+    
     $slotDuration = $availability->slot_duration;
-    $endTime = Carbon::parse($startTime)->addMinutes($slotDuration)->format('H:i:s');
 
-    // ... (sisa kode untuk pengecekan konflik dan create appointment) ...
+    // PERBAIKAN UTAMA: Pastikan parsing waktu yang benar
+    try {
+        // Jika startTime sudah dalam format H:i:s, gunakan langsung
+        if (preg_match('/^\d{2}:\d{2}:\d{2}$/', $startTime)) {
+            // Format sudah benar H:i:s
+            $startTimeCarbon = Carbon::createFromFormat('H:i:s', $startTime);
+        } else {
+            // Jika format lain, coba parse
+            $startTimeCarbon = Carbon::parse($startTime);
+        }
+        
+        $endTime = $startTimeCarbon->copy()->addMinutes($slotDuration)->format('H:i:s');
+        
+        Log::info("PatientAppointmentController@store - Waktu yang diproses:", [
+            'original_start_time' => $startTime,
+            'parsed_start_time' => $startTimeCarbon->format('H:i:s'),
+            'calculated_end_time' => $endTime,
+            'slot_duration' => $slotDuration
+        ]);
+        
+    } catch (\Exception $e) {
+        Log::error("PatientAppointmentController@store - Error parsing waktu: " . $e->getMessage(), [
+            'start_time_input' => $startTime,
+            'slot_duration' => $slotDuration
+        ]);
+        return back()->withInput()->with('error', 'Format waktu tidak valid. Silakan coba lagi.');
+    }
+
+    // Gunakan format waktu yang sudah diperbaiki untuk pengecekan konflik
+    $finalStartTime = $startTimeCarbon->format('H:i:s');
+
     // Cek tabrakan dengan janji temu lain
     $conflictAppointment = Appointment::where('doctor_id', $doctorId)
         ->whereDate('appointment_date', $appointmentDate)
-        ->where(function ($q) use ($startTime, $endTime) {
+        ->where(function ($q) use ($finalStartTime, $endTime) {
             $q->where('start_time', '<', $endTime)
-                ->where('end_time', '>', $startTime);
+                ->where('end_time', '>', $finalStartTime);
         })
         ->whereIn('status', ['pending', 'scheduled', 'confirmed', 'check-in', 'waiting', 'in-consultation'])
         ->exists();
 
     if ($conflictAppointment) {
-            Log::warning("Store Appointment: Slot conflict (appointment exists) for Doctor ID {$doctorId}, Date {$appointmentDate}, Time {$startTime}-{$endTime}");
-            return back()->withInput()->with('error', 'Maaf, slot waktu yang Anda pilih sudah dipesan. Silakan pilih slot lain.');
+        Log::warning("Store Appointment: Slot conflict (appointment exists) for Doctor ID {$doctorId}, Date {$appointmentDate}, Time {$finalStartTime}-{$endTime}");
+        return back()->withInput()->with('error', 'Maaf, slot waktu yang Anda pilih sudah dipesan. Silakan pilih slot lain.');
     }
 
     // Cek tabrakan dengan slot yang diblokir
     $blocked = BlockedSlot::where('doctor_id', $doctorId)
         ->where('blocked_date', $appointmentDate)
-        ->where(function ($q) use ($startTime, $endTime) {
+        ->where(function ($q) use ($finalStartTime, $endTime) {
             $q->where('start_time', '<', $endTime)
-                ->where('end_time', '>', $startTime);
+                ->where('end_time', '>', $finalStartTime);
         })
         ->exists();
 
     if ($blocked) {
-        Log::warning("Store Appointment: Slot conflict (blocked slot) for Doctor ID {$doctorId}, Date {$appointmentDate}, Time {$startTime}-{$endTime}");
+        Log::warning("Store Appointment: Slot conflict (blocked slot) for Doctor ID {$doctorId}, Date {$appointmentDate}, Time {$finalStartTime}-{$endTime}");
         return back()->withInput()->with('error', 'Maaf, slot waktu yang Anda pilih tidak tersedia (diblokir). Silakan pilih slot lain.');
     }
-    //--- Akhir dari pengecekan ulang ---
 
+    // Buat appointment dengan waktu yang sudah diperbaiki
     Appointment::create([
         'patient_id' => $patientId,
         'doctor_id' => $doctorId,
         'specialty_id' => $doctor->specialty_id,
         'appointment_date' => $appointmentDate,
-        'start_time' => $startTime,
+        'start_time' => $finalStartTime,
         'end_time' => $endTime,
         'reason' => $validatedData['reason'],
         'status' => 'pending',
     ]);
-    Log::info("Appointment created successfully for Patient ID {$patientId}, Doctor ID {$doctorId}, Date {$appointmentDate}, Time {$startTime}-{$endTime}");
+    
+    Log::info("Appointment created successfully for Patient ID {$patientId}, Doctor ID {$doctorId}, Date {$appointmentDate}, Time {$finalStartTime}-{$endTime}");
 
     return redirect()->route('appointments.index')->with('success', 'Janji temu berhasil diajukan.');
 }
@@ -204,6 +234,18 @@ class PatientAppointmentController extends Controller
             'end_time_slot' => 'required|date_format:H:i:s',
             'reason' => 'nullable|string|max:255',
         ]);
+
+        // VALIDASI WAKTU untuk update
+        $appointmentDateTime = Carbon::parse($request->appointment_date . ' ' . $request->start_time_slot);
+        $now = Carbon::now();
+        
+        if ($appointmentDateTime->isPast()) {
+            return back()->withInput()->with('error', 'Tidak dapat mengubah janji temu ke waktu yang sudah berlalu.');
+        }
+
+        if ($appointmentDateTime->isToday() && $appointmentDateTime->lt($now)) {
+            return back()->withInput()->with('error', 'Waktu yang dipilih sudah berlalu hari ini.');
+        }
 
         $start = $request->start_time_slot;
         $end = $request->end_time_slot;
@@ -262,7 +304,6 @@ class PatientAppointmentController extends Controller
             return redirect()->route('appointments.index')->with('error', 'Akses ditolak.');
         }
 
-        // Hanya boleh dibatalkan jika statusnya pending, confirmed, atau scheduled
         if (in_array($appointment->status, ['pending', 'confirmed', 'scheduled'])) {
             $appointment->status = 'cancelled';
             $appointment->save();
@@ -283,44 +324,53 @@ public function getAvailableSlots(Request $request)
         $doctorId = $validatedData['doctor_id'];
         $date = $validatedData['date'];
 
-        // Memanggil method statis dari model DoctorAvailability
+        // VALIDASI: Cek apakah tanggal yang diminta sudah lewat
+        $requestedDate = Carbon::parse($date);
+        $today = Carbon::today();
+        
+        if ($requestedDate->lt($today)) {
+            Log::info("getAvailableSlots: Requested past date {$date}");
+            return response()->json([]); // Return empty slots untuk tanggal yang sudah lewat
+        }
+
         $slots = DoctorAvailability::getAvailableSlots($doctorId, $date);
 
         $formatted = [];
+        $now = Carbon::now();
+        
         if (is_array($slots)) {
             foreach ($slots as $slot) {
                 if (is_array($slot) && isset($slot['start']) && isset($slot['end'])) {
+                    // FILTER SLOT: Untuk hari ini, hanya tampilkan slot yang belum lewat
+                    if ($requestedDate->isToday()) {
+                        $slotDateTime = Carbon::parse($date . ' ' . $slot['start']);
+                        if ($slotDateTime->lte($now)) {
+                            // Skip slot yang sudah lewat atau sedang berlangsung
+                            continue;
+                        }
+                    }
+                    
                     $formatted[] = [
-                        'start' => $slot['start'], // Format sudah H:i:s dari model
-                        'end' => $slot['end'],     // Format sudah H:i:s dari model
+                        'start' => $slot['start'],
+                        'end' => $slot['end'],
                         'display' => Carbon::parse($slot['start'])->format('H:i') . ' - ' . Carbon::parse($slot['end'])->format('H:i'),
                     ];
                 } else {
-                    // Log jika ada struktur slot yang tidak valid dari model
                     \Log::warning("PatientAppointmentController: Struktur slot tidak valid diterima dari DoctorAvailability::getAvailableSlots. DoctorID: {$doctorId}, Date: {$date}. Data Slot: " . json_encode($slot));
                 }
             }
         } else {
-            // Log jika $slots bukan array
             \Log::error("PatientAppointmentController: Diharapkan array dari DoctorAvailability::getAvailableSlots. DoctorID: {$doctorId}, Date: {$date}. Diterima: " . gettype($slots));
-            // $formatted akan tetap kosong, menghasilkan respons json([])
         }
 
         return response()->json($formatted);
 
     } catch (\Illuminate\Validation\ValidationException $e) {
-        // Tangani error validasi secara eksplisit jika diperlukan,
-        // atau biarkan Laravel yang mengirim respons 422.
-        // Untuk debugging, log error validasi.
         \Log::error("PatientAppointmentController: Error validasi saat mengambil slot. DoctorID: {$request->input('doctor_id')}, Date: {$request->input('date')}. Errors: " . json_encode($e->errors()));
-        // Kembalikan respons JSON dengan error validasi
         return response()->json(['message' => 'Data yang diberikan tidak valid.', 'errors' => $e->errors()], 422);
     } catch (\Exception $e) {
-        // Tangkap semua error lainnya
         \Log::error("PatientAppointmentController: Error di getAvailableSlots. DoctorID: {$request->input('doctor_id')}, Date: {$request->input('date')}: " . $e->getMessage() . " di " . $e->getFile() . ":" . $e->getLine());
-        // Kembalikan array kosong agar frontend menampilkan "No available slots" atau pesan serupa,
-        // dan tidak menampilkan "Failed to load slots" akibat error 500.
-        return response()->json([]); // HTTP status default adalah 200 OK
+        return response()->json([]);
         }
     }
 }

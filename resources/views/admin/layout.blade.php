@@ -6,7 +6,7 @@
     <base href="{{ asset('admincss')}}/">
     <title>AdminLTE 3 | Dashboard</title>
 
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&amp;display=fallback">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
     <link rel="stylesheet" href="plugins/fontawesome-free/css/all.min.css">
     <link rel="stylesheet" href="code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
     <link rel="stylesheet" href="plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css">
@@ -16,74 +16,91 @@
     <link rel="stylesheet" href="plugins/overlayScrollbars/css/OverlayScrollbars.min.css">
     <link rel="stylesheet" href="plugins/daterangepicker/daterangepicker.css">
     <link rel="stylesheet" href="plugins/summernote/summernote-bs4.min.css">
+
+    <style>
+        .navbar-nav .nav-link {
+            transition: all 0.2s ease-in-out;
+        }
+        .navbar-nav .nav-link:hover {
+            color: #007bff;
+        }
+    </style>
+
     @yield('customCss')
 </head>
 <body class="hold-transition sidebar-mini layout-fixed">
     <div class="wrapper">
 
+        <!-- Preloader -->
         <div class="preloader flex-column justify-content-center align-items-center">
             <img class="animation__shake" src="dist/img/AdminLTELogo.png" alt="AdminLTELogo" height="60" width="60">
         </div>
 
-        <nav class="main-header navbar navbar-expand navbar-white navbar-light">
+        <!-- Navbar -->
+        <nav class="main-header navbar navbar-expand navbar-white navbar-light shadow-sm">
+            <!-- Left navbar links -->
             <ul class="navbar-nav">
                 <li class="nav-item">
                     <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
                 </li>
                 <li class="nav-item d-none d-sm-inline-block">
-                    <a href="{{ route('home.dashboard') }}" class="nav-link">Home</a>
+                    <a href="{{ route('home.dashboard') }}" class="nav-link">
+                        <i class="fas fa-home mr-1"></i> Home
+                    </a>
                 </li>
             </ul>
 
-            <ul class="navbar-nav ml-auto">
-                <li class="nav-item">
+            <!-- Centered welcome -->
+            <ul class="navbar-nav mx-auto">
+                <li class="nav-item d-none d-sm-inline-block">
+                    <span class="nav-link text-muted font-weight-light">Welcome, {{ Auth::user()->name }}</span>
+                </li>
+            </ul>
+
+            <!-- Right navbar links -->
+            <ul class="navbar-nav ml-auto align-items-center">
+                <!-- Search -->
+                <li class="nav-item dropdown">
                     <a class="nav-link" data-widget="navbar-search" href="#" role="button">
                         <i class="fas fa-search"></i>
                     </a>
                     <div class="navbar-search-block">
                         <form class="form-inline">
                             <div class="input-group input-group-sm">
-                                <input class="form-control form-control-navbar" type="search" placeholder="Search" aria-label="Search">
+                                <input class="form-control form-control-navbar" type="search" placeholder="Search..." aria-label="Search">
                                 <div class="input-group-append">
-                                    <button class="btn btn-navbar" type="submit">
-                                        <i class="fas fa-search"></i>
-                                    </button>
-                                    <button class="btn btn-navbar" type="button" data-widget="navbar-search">
-                                        <i class="fas fa-times"></i>
-                                    </button>
+                                    <button class="btn btn-navbar" type="submit"><i class="fas fa-search"></i></button>
+                                    <button class="btn btn-navbar" type="button" data-widget="navbar-search"><i class="fas fa-times"></i></button>
                                 </div>
                             </div>
                         </form>
                     </div>
                 </li>
 
-                <!-- Tombol Logout -->
-                <li class="nav-item">
-                    <form method="POST" action="{{ route('logout') }}">
-                        @csrf
-                        <button type="submit" class="btn btn-link nav-link" style="border: none; padding: 0; color: inherit;">
-                            <i class="fas fa-sign-out-alt"></i> Logout
-                        </button>
-                    </form>
-                </li>
-
+                <!-- Fullscreen -->
                 <li class="nav-item">
                     <a class="nav-link" data-widget="fullscreen" href="#" role="button">
                         <i class="fas fa-expand-arrows-alt"></i>
                     </a>
                 </li>
+
+                <!-- Logout -->
                 <li class="nav-item">
-                    <a class="nav-link" data-widget="control-sidebar" data-controlsidebar-slide="true" href="#" role="button">
-                        <i class="fas fa-th-large"></i>
-                    </a>
+                    <form method="POST" action="{{ route('logout') }}" class="d-inline">
+                        @csrf
+                        <button type="submit" class="btn btn-link nav-link text-danger" style="border: none; padding: 0;">
+                            <i class="fas fa-sign-out-alt mr-1"></i> Logout
+                        </button>
+                    </form>
                 </li>
             </ul>
         </nav>
 
+        <!-- Sidebar -->
         <aside class="main-sidebar sidebar-dark-primary elevation-4">
             <a href="index3.html" class="brand-link">
                 <img src="dist/img/AdminLTELogo.png" alt="AdminLTE Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
-                <span class="brand-text font-weight-light">AdminLTE 3</span>
+                <span class="brand-text font-weight-light">Admin Panel</span>
             </a>
 
             <div class="sidebar">
@@ -107,117 +124,54 @@
                     </div>
                 </div>
 
+                <!-- Sidebar Menu -->
                 <nav class="mt-2">
                     <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
                         <li class="nav-item">
                             <a href="{{ route('admin.index') }}" class="nav-link">
-                                <i class="nav-icon fas fa-th"></i>
+                                <i class="nav-icon fas fa-tachometer-alt"></i>
                                 <p>Dashboard</p>
                             </a>
                         </li>
-
                         <li class="nav-item">
-                            <a href="#" class="nav-link">
-                                <i class="nav-icon fas fa-chart-pie"></i>
-                                <p>Doctor Management<i class="right fas fa-angle-left"></i></p>
+                            <a href="{{ route('admin.doctors.read') }}" class="nav-link">
+                                <i class="nav-icon fas fa-user-md"></i>
+                                <p>Doctor</p>
                             </a>
-                            <ul class="nav nav-treeview">
-                                <li class="nav-item">
-                                    <a href="{{ route('admin.doctors.create') }}" class="nav-link">
-                                        <i class="far fa-circle nav-icon"></i>
-                                        <p>Add Record</p>
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a href="{{ route('admin.doctors.read') }}" class="nav-link">
-                                        <i class="far fa-circle nav-icon"></i>
-                                        <p>View Record</p>
-                                    </a>
-                                </li>
-                            </ul>
                         </li>
-
                         <li class="nav-item">
-                            <a href="#" class="nav-link">
-                                <i class="nav-icon fas fa-chart-pie"></i>
-                                <p>Specialty Management<i class="right fas fa-angle-left"></i></p>
+                            <a href="{{ route('admin.specialties.index') }}" class="nav-link">
+                                <i class="nav-icon fas fa-stethoscope"></i>
+                                <p>Specialty</p>
                             </a>
-                            <ul class="nav nav-treeview">
-                                <li class="nav-item">
-                                    <a href="{{ route('admin.specialties.create') }}" class="nav-link">
-                                        <i class="far fa-circle nav-icon"></i>
-                                        <p>Add Record</p>
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a href="{{ route('admin.specialties.index') }}" class="nav-link">
-                                        <i class="far fa-circle nav-icon"></i>
-                                        <p>View Record</p>
-                                    </a>
-                                </li>
-                            </ul>
                         </li>
-
                         <li class="nav-item">
-                            <a href="#" class="nav-link">
-                                <i class="nav-icon fas fa-chart-pie"></i>
-                                <p>Patient Management<i class="right fas fa-angle-left"></i></p>
+                            <a href="{{ route('admin.patients.index') }}" class="nav-link">
+                                <i class="nav-icon fas fa-user-injured"></i>
+                                <p>Patient</p>
                             </a>
-                            <ul class="nav nav-treeview">
-                                <li class="nav-item">
-                                    <a href="{{ route('admin.patients.create') }}" class="nav-link">
-                                        <i class="far fa-circle nav-icon"></i>
-                                        <p>Add Record</p>
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a href="{{ route('admin.patients.index') }}" class="nav-link">
-                                        <i class="far fa-circle nav-icon"></i>
-                                        <p>View Record</p>
-                                    </a>
-                                </li>
-                            </ul>
                         </li>
-
                         <li class="nav-item">
-                            <a href="#" class="nav-link">
-                                <i class="nav-icon fas fa-chart-pie"></i>
-                                <p>Appointment<i class="right fas fa-angle-left"></i></p>
+                            <a href="{{ route('admin.appointments.index') }}" class="nav-link">
+                                <i class="nav-icon fas fa-calendar-check"></i>
+                                <p>Appointment</p>
                             </a>
-                            <ul class="nav nav-treeview">
-                                <li class="nav-item">
-                                    <a href="{{ route('admin.appointments.create') }}" class="nav-link">
-                                        <i class="far fa-circle nav-icon"></i>
-                                        <p>Add Record</p>
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a href="{{ route('admin.appointments.index') }}" class="nav-link">
-                                        <i class="far fa-circle nav-icon"></i>
-                                        <p>View Record</p>
-                                    </a>
-                                </li>
-                            </ul>
                         </li>
-
                         <li class="nav-item">
                             <a href="{{ route('doctor_schedules.index') }}" class="nav-link">
-                                <i class="nav-icon fas fa-calendar-alt"></i>
-                                <p>
-                                    Doctor Availabilities </p>
+                                <i class="nav-icon fas fa-clock"></i>
+                                <p>Doctor Availabilities</p>
                             </a>
                         </li>
-                        
-                            </ul>
-                        </li>
-
                     </ul>
                 </nav>
             </div>
         </aside>
 
+        <!-- Content -->
         @yield('content')
 
+        <!-- Footer -->
         <footer class="main-footer">
             <strong>&copy; 2014-2021 <a href="https://adminlte.io/">AdminLTE.io</a>.</strong> All rights reserved.
             <div class="float-right d-none d-sm-inline-block">
@@ -225,9 +179,11 @@
             </div>
         </footer>
 
+        <!-- Control Sidebar -->
         <aside class="control-sidebar control-sidebar-dark"></aside>
     </div>
 
+    <!-- Scripts -->
     <script src="plugins/jquery/jquery.min.js"></script>
     <script src="plugins/jquery-ui/jquery-ui.min.js"></script>
     <script>

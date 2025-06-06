@@ -16,6 +16,20 @@ class HomeController extends Controller
 {
     public function index()
     {
+        // $user = Auth::user();
+        // if ($user->role === 'admin')
+        // {
+        //     return redirect()->route('admin.index');    
+        // }elseif ($user->role === 'doctor')
+        // {
+        //     return redirect()->route('doctor.dashboard');
+        // }elseif ($user->role === 'patient')
+        // {
+        //     return redirect()->route('patient.inde');
+        // }elseif ($user->role === 'staff')
+        // {
+        //     return redirect()->route('staff.index');
+        // }
         // Perbaikan query untuk mendapatkan top doctors dengan feedback
         $topDoctors = Doctor::with(['user', 'specialty', 'feedback'])
             ->withCount('feedback')

@@ -273,7 +273,7 @@
                 <a href="{{ route('doctors.index') }}" class="btn btn-primary rounded-pill py-3 px-5">
                     View All Doctors
                 </a>
-            </div>
+            </div>  
         @endif
     </div>
 </div>
@@ -300,7 +300,7 @@
                     </div>
                     <div class="ms-3">
                         <h5 class="mb-1">Email Us</h5>
-                        <p class="mb-0">info@example.com</p>
+                        <p class="mb-0">admin@gmail.com</p>
                     </div>
                 </div>
             </div>
