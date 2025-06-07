@@ -52,7 +52,7 @@ class PatientProfileController extends Controller
             'blood_type' => 'nullable|string|max:5',
             'profile_picture' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'], // Validasi untuk gambar
         ]);
-
+ 
         // Proses upload foto profil jika ada
         $profilePicturePath = null;
         if ($request->hasFile('profile_picture')) {

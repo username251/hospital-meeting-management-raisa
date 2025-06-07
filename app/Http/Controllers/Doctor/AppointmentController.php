@@ -29,7 +29,7 @@ class AppointmentController extends Controller
         if (!$user->doctor) {
             // Jika user bukan dokter atau profil dokter tidak ditemukan,
             // arahkan kembali atau tampilkan pesan error
-            return redirect()->route('dashboard')->with('error', 'Anda tidak memiliki profil dokter yang terkait.');
+            return redirect()->route('home.dashboard')->with('error', 'Anda tidak memiliki profil dokter yang terkait.');
         }
 
         $doctorId = $user->doctor->id; // Dapatkan ID dokter yang sedang login
