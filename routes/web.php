@@ -283,9 +283,14 @@ Route::group(['prefix' => 'patient', 'middleware' => ['auth', 'check.role:patien
     // Route::get('/appointments/get-available-slots', [PatientAppointmentController::class, 'getAvailableSlots'])->name('appointments.get-available-slots');
 
         //route untuk feedback
-         Route::get('/appointments/{appointment}/feedback/create', [FeedbackController::class, 'create'])->name('feedback.create');
-    Route::post('/appointments/{appointment}/feedback', [FeedbackController::class, 'store'])->name('feedback.store');
+        Route::get('/appointments/{appointment}/feedback/create', [FeedbackController::class, 'create'])->name('feedback.create');
+        Route::post('/appointments/{appointment}/feedback', [FeedbackController::class, 'store'])->name('feedback.store');
 
+        //Route untuk melihat jadwal dokter
+       Route::get('/doctor-schedule', [App\Http\Controllers\Patient\PatientDoctorScheduleController::class, 'index'])
+             ->name('patient.doctor-schedule.index');
+        Route::get('/doctor-schedule{doctor}/show', [App\Http\Controllers\Patient\PatientDoctorScheduleController::class, 'show'])
+             ->name('patient.doctor-schedule.show');
 
     });
 require __DIR__.'/auth.php'; // Rute otentikasi Breeze

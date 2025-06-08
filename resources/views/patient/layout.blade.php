@@ -112,11 +112,6 @@
                 </li> 
 
                 <li class="nav-item">
-                    <a class="nav-link" data-widget="fullscreen" href="#" role="button">
-                        <i class="fas fa-expand-arrows-alt"></i>
-                    </a>
-                </li>
-                <li class="nav-item">
                     <a class="nav-link" data-widget="control-sidebar" data-controlsidebar-slide="true" href="#" role="button">
                         <i class="fas fa-th-large"></i>
                     </a>
@@ -189,6 +184,13 @@
                                 <p>Manajemen Janji Temu</p>
                             </a>
                         </li>
+                          <li class="nav-item">
+                            {{-- Pastikan route 'appointments.index' sesuai untuk pasien --}}
+                            <a href="{{ route('patient.doctor-schedule.index') }}" class="nav-link {{ request()->routeIs('appointments.index') || request()->routeIs('patient.appointments.*') ? 'active' : '' }}"> {{-- Menyesuaikan routeIs check --}}
+                                <i class="nav-icon fas fa-calendar-check"></i>
+                                <p>Jadwal Dokter</p>
+                            </a>
+                        </li>
                         {{-- Item menu lain untuk pasien bisa ditambahkan di sini --}}
                     </ul>
                 </nav>
@@ -197,12 +199,7 @@
 
         @yield('content')
 
-        <footer class="main-footer">
-            <strong>&copy; 2014-{{ date('Y') }} <a href="https://adminlte.io/">AdminLTE.io</a>.</strong> All rights reserved.
-            <div class="float-right d-none d-sm-inline-block">
-                <b>Version</b> 3.2.0
-            </div>
-        </footer>
+       
 
         <aside class="control-sidebar control-sidebar-dark"></aside>
     </div>

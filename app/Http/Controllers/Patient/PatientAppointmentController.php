@@ -324,53 +324,45 @@ public function getAvailableSlots(Request $request)
         $doctorId = $validatedData['doctor_id'];
         $date = $validatedData['date'];
 
-        // VALIDASI: Cek apakah tanggal yang diminta sudah lewat
         $requestedDate = Carbon::parse($date);
         $today = Carbon::today();
-        
+
         if ($requestedDate->lt($today)) {
             Log::info("getAvailableSlots: Requested past date {$date}");
-            return response()->json([]); // Return empty slots untuk tanggal yang sudah lewat
+            return response()->json([]);
         }
 
+        // Panggil metode di model DoctorAvailability
         $slots = DoctorAvailability::getAvailableSlots($doctorId, $date);
 
         $formatted = [];
         $now = Carbon::now();
-        
+
         if (is_array($slots)) {
             foreach ($slots as $slot) {
                 if (is_array($slot) && isset($slot['start']) && isset($slot['end'])) {
-                    // FILTER SLOT: Untuk hari ini, hanya tampilkan slot yang belum lewat
                     if ($requestedDate->isToday()) {
                         $slotDateTime = Carbon::parse($date . ' ' . $slot['start']);
                         if ($slotDateTime->lte($now)) {
-                            // Skip slot yang sudah lewat atau sedang berlangsung
                             continue;
                         }
                     }
-                    
                     $formatted[] = [
                         'start' => $slot['start'],
                         'end' => $slot['end'],
                         'display' => Carbon::parse($slot['start'])->format('H:i') . ' - ' . Carbon::parse($slot['end'])->format('H:i'),
                     ];
-                } else {
-                    \Log::warning("PatientAppointmentController: Struktur slot tidak valid diterima dari DoctorAvailability::getAvailableSlots. DoctorID: {$doctorId}, Date: {$date}. Data Slot: " . json_encode($slot));
                 }
             }
-        } else {
-            \Log::error("PatientAppointmentController: Diharapkan array dari DoctorAvailability::getAvailableSlots. DoctorID: {$doctorId}, Date: {$date}. Diterima: " . gettype($slots));
         }
 
         return response()->json($formatted);
-
     } catch (\Illuminate\Validation\ValidationException $e) {
-        \Log::error("PatientAppointmentController: Error validasi saat mengambil slot. DoctorID: {$request->input('doctor_id')}, Date: {$request->input('date')}. Errors: " . json_encode($e->errors()));
+        Log::error("PatientAppointmentController: Error validasi saat mengambil slot. DoctorID: {$request->input('doctor_id')}, Date: {$request->input('date')}. Errors: " . json_encode($e->errors()));
         return response()->json(['message' => 'Data yang diberikan tidak valid.', 'errors' => $e->errors()], 422);
     } catch (\Exception $e) {
-        \Log::error("PatientAppointmentController: Error di getAvailableSlots. DoctorID: {$request->input('doctor_id')}, Date: {$request->input('date')}: " . $e->getMessage() . " di " . $e->getFile() . ":" . $e->getLine());
+        Log::error("PatientAppointmentController: Error di getAvailableSlots. DoctorID: {$request->input('doctor_id')}, Date: {$request->input('date')}: " . $e->getMessage());
         return response()->json([]);
-        }
     }
+}
 }

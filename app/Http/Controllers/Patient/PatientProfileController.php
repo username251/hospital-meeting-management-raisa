@@ -118,7 +118,7 @@ class PatientProfileController extends Controller
             ],
             'password' => 'nullable|string|min:8|confirmed', // Password opsional saat update
             'phone' => 'nullable|string|max:20', // phone di tabel patients
-            'date_of_birth' => 'required|date',
+            'date_of_birth' => 'nullable|date', // Changed to nullable|date to make it optional
             'address' => 'required|string',
             'gender' => ['required', Rule::in(['Male', 'Female', 'Other'])],
             'medical_history' => 'nullable|string',
@@ -155,7 +155,7 @@ class PatientProfileController extends Controller
         // Update data Patient
         $patient->update([
             'phone' => $request->phone,
-            'date_of_birth' => $request->date_of_birth,
+            'date_of_birth' => $request->date_of_birth, // Will only update if provided
             'address' => $request->address,
             'gender' => $request->gender,
             'medical_history' => $request->medical_history,

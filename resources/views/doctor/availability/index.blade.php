@@ -53,8 +53,9 @@
                 </div>
             </div>
 
-            <div class="card mt-3"> <div class="card-header">
-                    <h3 class="card-title">Daftar Jadwal (Tabel Detail)</h3>
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h3 class="card-title">Daftar Jadwal Mingguan</h3>
                 </div>
                 <div class="card-body p-0">
                     @if($availabilities->isEmpty())
@@ -106,11 +107,54 @@
                     @endif
                 </div>
             </div>
-        </div></section>
-    </div>
+        </div>
+    </section>
+</div>
 @endsection
 
+@push('styles')
+<style>
+    .card {
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        border: none;
+        transition: transform 0.3s ease;
+    }
+    .card-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 10px 10px 0 0 !important;
+        padding: 15px 20px;
+    }
+    .fc-day-sat {
+        background-color: #f8f9fa; /* Light gray for Saturday */
+    }
+    .fc-day-sun {
+        background-color: #fff3cd; /* Light yellow for Sunday */
+    }
+    .fc-event {
+        border-radius: 5px;
+        padding: 5px;
+        font-size: 0.9em;
+    }
+    .fc-timegrid-slot-label {
+        font-weight: bold;
+    }
+    @media (max-width: 768px) {
+        .fc-header-toolbar {
+            flex-direction: column;
+            gap: 10px;
+        }
+        .fc-toolbar-chunk {
+            display: flex;
+            justify-content: center;
+        }
+    }
+</style>
+@endpush
+
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         var calendarEl = document.getElementById('calendar');
@@ -122,17 +166,21 @@
                 center: 'title',
                 right: 'dayGridMonth,timeGridWeek,timeGridDay'
             },
-            slotMinTime: '06:00:00', // Waktu mulai hari di kalender (misal: 6 pagi)
-            slotMaxTime: '22:00:00', // Waktu selesai hari di kalender (misal: 10 malam)
-            height: 'auto', // Tinggi kalender menyesuaikan konten
+            slotMinTime: '06:00:00', // Mulai dari 06:00
+            slotMaxTime: '22:00:00', // Selesai pada 22:00
+            height: 'auto', // Tinggi menyesuaikan konten
             allDaySlot: false, // Sembunyikan baris "All-day"
-            events: @json($events), // Meneruskan data events dari Laravel
+            dayHeaderFormat: { weekday: 'long' }, // Tampilkan nama hari lengkap
+            slotLabelFormat: { hour: '2-digit', minute: '2-digit', hour12: false }, // Format waktu 24 jam
+            events: @json($events), // Data events dari controller
+            eventContent: function(arg) {
+                return {
+                    html: '<div style="color: white;">' + arg.event.title + '</div>'
+                };
+            },
             eventClick: function(info) {
-                // Saat event di kalender diklik
                 var event = info.event;
                 var extendedProps = event.extendedProps;
-
-                // Anda bisa menampilkan modal atau redirect ke halaman edit
                 if (extendedProps.edit_url) {
                     if (confirm('Jadwal ini (' + event.title + '). Ingin mengedit jadwal ini?')) {
                         window.location.href = extendedProps.edit_url;
@@ -145,8 +193,13 @@
                           'Status: ' + extendedProps.status);
                 }
             },
-            // Tambahkan eventDisplay: 'auto' atau 'block' jika event tidak terlihat dengan baik
-            // eventDisplay: 'block', // Coba ini jika event tidak muncul
+            dayCellDidMount: function(info) {
+                if (info.date.getDay() === 0) { // Sunday
+                    info.el.style.backgroundColor = '#fff3cd';
+                } else if (info.date.getDay() === 6) { // Saturday
+                    info.el.style.backgroundColor = '#f8f9fa';
+                }
+            }
         });
         calendar.render();
     });

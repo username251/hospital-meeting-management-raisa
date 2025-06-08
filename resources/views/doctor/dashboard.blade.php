@@ -161,7 +161,7 @@
                                                             <div>
                                                                 <strong>{{ $appointment->patient->user->name ?? 'N/A' }}</strong>
                                                                 <small class="text-muted d-block">
-                                                                    {{ $appointment->complaint ?? 'Tidak ada keluhan' }}
+                                                                    {{ $appointment->reason ?? 'Tidak ada keluhan' }}
                                                                 </small>
                                                             </div>
                                                         </div>
@@ -311,7 +311,7 @@
                         </div>
                         <div class="card-body">
                             <ul class="list-unstyled">
-                                @foreach($todayAppointments->where('tus', 'completed')->take(3) as $completed)
+                                @foreach($todayAppointments->where('status', 'completed')->take(3) as $completed)
                                     <li class="mb-2">
                                         <i class="fas fa-check text-success mr-2"></i>
                                         Selesai konsultasi dengan {{ $completed->patient->user->name ?? 'N/A' }}
@@ -355,13 +355,13 @@
                                 </div>
                                 <div class="col-md-3">
                                     <div class="border rounded p-3">
-                                        <h4 class="text-success">-</h4>
+                                        <h4 class="text-warning">{{ $weeklyAppointmentsCount }}</h4>
                                         <small class="text-muted">Minggu Ini</small>
                                     </div>
                                 </div>
-                                <div class="col-md-3">
+                                    <div class="col-md-3">
                                     <div class="border rounded p-3">
-                                        <h4 class="text-warning">-</h4>
+                                        <h4 class="text-warning">{{ $monthlyAppointmentsCount }}</h4>
                                         <small class="text-muted">Bulan Ini</small>
                                     </div>
                                 </div>

@@ -28,10 +28,24 @@ class DashboardController extends Controller
             ->orderBy('start_time')
             ->get();
 
+        // Jumlah janji temu minggu ini
+        $weeklyAppointmentsCount = Appointment::where('doctor_id', $doctor->id)
+            ->whereBetween('appointment_date', [
+                Carbon::today()->startOfWeek(), // Senin
+                Carbon::today()->endOfWeek()    // Minggu
+            ])
+            ->count();
+
+        // Jumlah janji temu bulan ini
+        $monthlyAppointmentsCount = Appointment::where('doctor_id', $doctor->id)
+            ->whereMonth('appointment_date', Carbon::today()->month)
+            ->whereYear('appointment_date', Carbon::today()->year)
+            ->count();
+
         // Additional statistics for enhanced dashboard
         $statistics = $this->getDashboardStatistics($doctor->id);
 
-        return view('doctor.dashboard', compact('doctor', 'todayAppointments', 'statistics'));
+        return view('doctor.dashboard', compact('doctor', 'todayAppointments', 'statistics', 'weeklyAppointmentsCount', 'monthlyAppointmentsCount'));
     }
 
     /**

@@ -109,22 +109,6 @@
                                     @enderror
                                 </div>
 
-                                <!-- Durasi Slot -->
-                                <div class="form-group">
-                                    <label for="slot_duration">Durasi Slot (menit)</label>
-                                    <select class="form-control @error('slot_duration') is-invalid @enderror" 
-                                            id="slot_duration" name="slot_duration">
-                                        <option value="15" {{ old('slot_duration') == '15' ? 'selected' : '' }}>15 Menit</option>
-                                        <option value="30" {{ old('slot_duration', '30') == '30' ? 'selected' : '' }}>30 Menit</option>
-                                        <option value="45" {{ old('slot_duration') == '45' ? 'selected' : '' }}>45 Menit</option>
-                                        <option value="60" {{ old('slot_duration') == '60' ? 'selected' : '' }}>60 Menit</option>
-                                    </select>
-                                    @error('slot_duration')
-                                        <span class="invalid-feedback">{{ $message }}</span>
-                                    @enderror
-                                    <small class="form-text text-muted">Durasi setiap slot appointment</small>
-                                </div>
-
                                 <!-- Status Ketersediaan -->
                                 <div class="form-group">
                                     <div class="custom-control custom-checkbox">
@@ -166,14 +150,14 @@
                             <ul class="list-unstyled">
                                 <li><i class="fas fa-check text-success"></i> Pilih dokter terlebih dahulu</li>
                                 <li><i class="fas fa-check text-success"></i> Tentukan hari dan waktu praktik</li>
-                                <li><i class="fas fa-check text-success"></i> Atur durasi slot sesuai kebutuhan</li>
                                 <li><i class="fas fa-check text-success"></i> Pastikan tidak ada konflik jadwal</li>
                             </ul>
                             <hr>
                             <p><strong>Catatan:</strong></p>
                             <p class="text-muted small">
                                 Sistem akan otomatis mengecek konflik jadwal untuk mencegah 
-                                tumpang tindih waktu pada dokter yang sama.
+                                tumpang tindih waktu pada dokter yang sama. Data akan disimpan
+                                ke tabel doctor_availabilities agar dapat digunakan untuk appointment.
                             </p>
                         </div>
                     </div>
