@@ -16,6 +16,7 @@
                     <div class="dropdown-menu rounded-0 rounded-bottom m-0">
                         <a href="#feature-section" class="dropdown-item">Feature</a>
                         <a href="#doctors-section" class="dropdown-item">Our Doctor</a>
+                        <a href="{{ route('patient.index') }}" class="dropdown-item">Dashboard</a>
                       @auth
                             @if (auth()->user()->role === 'patient')
                                 <a href="{{ route('appointments.create') }}" class="dropdown-item">Appointment</a>

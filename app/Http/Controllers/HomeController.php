@@ -57,8 +57,7 @@ class HomeController extends Controller
             ->take(6)
             ->get();
 
-        $specialties = Specialty::all();
-
+        $specialties = Specialty::orderBy('name')->take(6)->get();
         // Data statistik sederhana
         $totalPatients = Patient::count();
         $totalDoctors = Doctor::count();

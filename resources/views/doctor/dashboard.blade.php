@@ -95,7 +95,7 @@
                         <div class="icon">
                             <i class="fas fa-check-circle"></i>
                         </div>
-                        <a href="#" class="small-box-footer">
+                        <a  class="small-box-footer">
                             <i class="fas fa-chart-line"></i>
                         </a>
                     </div>
@@ -367,8 +367,8 @@
                                 </div>
                                 <div class="col-md-3">
                                     <div class="border rounded p-3">
-                                        <h4 class="text-info">{{ $doctor->user->created_at->diffInDays() }}</h4>
-                                        <small class="text-muted">Hari Bergabung</small>
+                                        <h4 class="text-info">{{ $doctor->user->created_at }}</h4>
+                                        <small class="text-muted">Tanggal Bergabung</small>
                                     </div>
                                 </div>
                             </div>

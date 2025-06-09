@@ -178,16 +178,14 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            {{-- Pastikan route 'appointments.index' sesuai untuk pasien --}}
-                            <a href="{{ route('appointments.index') }}" class="nav-link {{ request()->routeIs('appointments.index') || request()->routeIs('patient.appointments.*') ? 'active' : '' }}"> {{-- Menyesuaikan routeIs check --}}
+                            <a href="{{ route('appointments.index') }}" class="nav-link {{ request()->routeIs('appointments.index') || request()->routeIs('patient.appointments.*') ? 'active' : '' }}">
                                 <i class="nav-icon fas fa-calendar-check"></i>
                                 <p>Manajemen Janji Temu</p>
                             </a>
                         </li>
-                          <li class="nav-item">
-                            {{-- Pastikan route 'appointments.index' sesuai untuk pasien --}}
-                            <a href="{{ route('patient.doctor-schedule.index') }}" class="nav-link {{ request()->routeIs('appointments.index') || request()->routeIs('patient.appointments.*') ? 'active' : '' }}"> {{-- Menyesuaikan routeIs check --}}
-                                <i class="nav-icon fas fa-calendar-check"></i>
+                        <li class="nav-item">
+                            <a href="{{ route('patient.doctor-schedule.index') }}" class="nav-link {{ request()->routeIs('patient.doctor-schedule.index') ? 'active' : '' }}">
+                                <i class="nav-icon fas fa-clock"></i>
                                 <p>Jadwal Dokter</p>
                             </a>
                         </li>
