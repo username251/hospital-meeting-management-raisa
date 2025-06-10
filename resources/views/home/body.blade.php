@@ -26,13 +26,13 @@
         <div class="col-lg-6 wow fadeIn" data-wow-delay="0.5s">
             <div class="owl-carousel header-carousel">
                 <div class="owl-carousel-item">
-                    <img class="img-fluid" src="img/carousel-1.jpg" alt="">
+                    <img loading="lazy" class="img-fluid" src="img/carousel-1.jpg" alt="">
                 </div>
                 <div class="owl-carousel-item">
-                    <img class="img-fluid" src="img/carousel-2.jpg" alt="">
+                    <img loading="lazy" class="img-fluid" src="img/carousel-2.jpg" alt="">
                 </div>
                 <div class="owl-carousel-item">
-                    <img class="img-fluid" src="img/carousel-3.jpg" alt="">
+                    <img loading="lazy" class="img-fluid" src="img/carousel-3.jpg" alt="">
                 </div>
             </div>
         </div>
@@ -43,8 +43,8 @@
         <div class="row g-5">
             <div class="col-lg-6 wow fadeIn" data-wow-delay="0.1s">
                 <div class="d-flex flex-column">
-                    <img class="img-fluid rounded w-75 align-self-end" src="img/about-1.jpg" alt="">
-                    <img class="img-fluid rounded w-50 bg-white pt-3 pe-3" src="img/about-2.jpg" alt="" style="margin-top: -25%;">
+                    <img loading="lazy" class="img-fluid rounded w-75 align-self-end" src="img/about-1.jpg" alt="">
+                    <img loading="lazy" class="img-fluid rounded w-50 bg-white pt-3 pe-3" src="img/about-2.jpg" alt="" style="margin-top: -25%;">
                 </div>
             </div>
             <div class="col-lg-6 wow fadeIn" data-wow-delay="0.5s">
@@ -172,7 +172,7 @@
             </div>
             <div class="col-lg-6 pe-lg-0 wow fadeIn" data-wow-delay="0.5s" style="min-height: 400px;">
                 <div class="position-relative h-100">
-                    <img class="position-absolute img-fluid w-100 h-100" src="img/feature.jpg" style="object-fit: cover;" alt="">
+                    <img loading="lazy" class="position-absolute img-fluid w-100 h-100" src="img/feature.jpg" style="object-fit: cover;" alt="">
                 </div>
             </div>
         </div>
@@ -193,7 +193,7 @@
                           
 
                             <!-- Profile Picture -->
-                            <img class="img-fluid" src="{{ $doctor->profile_picture ? asset('storage/' . $doctor->profile_picture) : asset('img/default-doctor.jpg') }}" alt="Foto {{ $doctor->name ?? ($doctor->user ? $doctor->user->name : 'Dokter') }}" style="width:100%; height: 280px; object-fit: cover;">
+                            <img loading="lazy" class="img-fluid" src="{{ $doctor->profile_picture ? asset('storage/' . $doctor->profile_picture) : asset('img/default-doctor.jpg') }}" alt="Foto {{ $doctor->name ?? ($doctor->user ? $doctor->user->name : 'Dokter') }}" style="width:100%; height: 280px; object-fit: cover;">
 
                         </div>
                         <div class="team-text bg-light text-center p-4">
@@ -350,6 +350,7 @@
                                         ? asset('storage/' . $testimonial->patient->profile_picture) 
                                         : asset('images/default-profile.png') }}" 
                                  alt="Profile Picture" 
+                                 loading="lazy"
                                  class="img-fluid rounded-circle" 
                                  style="width: 100%; height: 100%; object-fit: cover;">
                         </div>

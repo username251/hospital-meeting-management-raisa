@@ -29,7 +29,7 @@
     <div class="wrapper">
         <!-- Preloader -->
         <div class="preloader flex-column justify-content-center align-items-center">
-            <img class="animation__shake" src="dist/img/AdminLTELogo.png" alt="AdminLTELogo" height="60" width="60">
+            <img class="animation__shake" src="dist/img/AdminLTELogo.png" alt="AdminLTELogo" loading="lazy" height="60" width="60">
         </div>
 
         <!-- Main Header / Navbar -->
@@ -75,13 +75,13 @@
                     @if(Auth::user()->doctor) {{-- Pastikan user adalah dokter dan memiliki relasi doctor --}}
                         <li class="nav-item dropdown user-menu">
                             <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">
-                                <img src="{{ Auth::user()->doctor->profile_picture ? asset('storage/' . Auth::user()->doctor->profile_picture) : asset('admincss/dist/img/user2-160x160.jpg') }}" class="user-image img-circle elevation-2" alt="User Image">
+                                <img src="{{ Auth::user()->doctor->profile_picture ? asset('storage/' . Auth::user()->doctor->profile_picture) : asset('admincss/dist/img/user2-160x160.jpg') }}" loading="lazy" class="user-image img-circle elevation-2" alt="User Image">
                                 <span class="d-none d-md-inline">{{ Auth::user()->name }}</span>
                             </a>
                             <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
                                 <!-- User image -->
                                 <li class="user-header bg-info"> {{-- Anda bisa mengganti bg-info --}}
-                                    <img src="{{ Auth::user()->doctor->profile_picture ? asset('storage/' . Auth::user()->doctor->profile_picture) : asset('admincss/dist/img/user2-160x160.jpg') }}" class="img-circle elevation-2" alt="User Image">
+                                    <img src="{{ Auth::user()->doctor->profile_picture ? asset('storage/' . Auth::user()->doctor->profile_picture) : asset('admincss/dist/img/user2-160x160.jpg') }}" loading="lazy" class="img-circle elevation-2" alt="User Image">
                                     <p>
                                         {{ Auth::user()->name }} - {{ Auth::user()->doctor->specialty->name ?? 'Dokter' }}
                                         <small>Bergabung sejak {{ Auth::user()->created_at->translatedFormat('M. Y') }}</small>
@@ -134,7 +134,7 @@
         <aside class="main-sidebar sidebar-dark-primary elevation-4">
             <!-- Brand Logo -->
             <a href="{{ route('doctor.dashboard') }}" class="brand-link">
-                <img src="dist/img/AdminLTELogo.png" alt="AdminLTE Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
+                <img src="dist/img/AdminLTELogo.png" alt="AdminLTE Logo" loading="lazy" class="brand-image img-circle elevation-3" style="opacity: .8">
                 <span class="brand-text font-weight-light">Doctor Panel</span>
             </a>
 
@@ -146,7 +146,7 @@
                     <div class="user-panel mt-3 pb-3 mb-3 d-flex">
                         <div class="image">
                             {{-- Menampilkan foto profil dokter, atau default jika tidak ada --}}
-                            <img src="{{ Auth::user()->doctor->profile_picture ? asset('storage/' . Auth::user()->doctor->profile_picture) : asset('admincss/dist/img/user2-160x160.jpg') }}" class="img-circle elevation-2" alt="User Image">
+                            <img src="{{ Auth::user()->doctor->profile_picture ? asset('storage/' . Auth::user()->doctor->profile_picture) : asset('admincss/dist/img/user2-160x160.jpg') }}" loading="lazy" class="img-circle elevation-2" alt="User Image">
                         </div>
                         <div class="info">
                             {{-- Link ke halaman edit profil dokter --}}
